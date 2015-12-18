@@ -1,0 +1,70 @@
+<html>
+
+<head>
+	<title>page3</title>
+</head>
+
+<body>
+	<h2 align="center"><font color="yellow">Page4</font></h2>
+	
+	<form>	
+		<!--文本框-->
+		First name:&nbsp;&nbsp;<input type="text" name="firstname">
+		<br>
+		Last name:&nbsp;&nbsp;<input type="text" name="lastname">
+		<br>
+		Password:&nbsp;&nbsp;&nbsp;<input type="password" name="password">
+		<br>
+		<br>		
+		<!--单选按钮-->
+		<input type="radio" name="sex" value="male">Male
+		<br>
+		<input type="radio" name="sex" value="female" checked>Female
+		<br>
+		<br>		
+		<!--复选框-->
+		<input type="checkbox" name="bike">I have a bike
+		<br>
+		<input type="checkbox" name="car">I have a car
+		<br>
+		<br>
+		<!--按钮-->	
+		<input type="button" value="Hello world!">
+		<br>
+		<br>
+		<!--下拉列表-->
+		<select name="cars">
+			<option value="volvo">Volvo
+			<option value="saab">Saab
+			<option value="fiat" selected>Fiat
+			<option value="audi">Audi
+		</select>
+		<br>
+		<br>
+		<!--文本域-->	
+		<textarea rows="10" cols="30">The cat was playing in the garden.</textarea>
+	</form>
+	
+	<!--提交-->
+	<form name="input" action="page5.html" method="get">
+		Username: 
+		<input type="text" name="user">
+		<input type="submit" value="Submit">
+	</form> 
+	
+	<!--数据周围的标题边框-->
+	<fieldset>
+		<legend>
+			Health information:
+		</legend>
+		<form>
+			Height:<input type="text" size="3">&nbsp;&nbsp;
+			Weight:<input type="text" size="3">
+		</form>
+	</fieldset>
+
+
+	
+</body>
+
+</html>
