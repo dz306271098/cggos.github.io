@@ -10,3 +10,5 @@ WebSiteTest:
 * HTML 
 * CSS 
 * JavaScript
+
+**注意：下载整个工程后，将JS库extjs-4.1.1放在js目录下，否则某些功能不能使用！**
