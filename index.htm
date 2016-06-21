@@ -1,72 +1,143 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" xmlns:fb="http://ogp.me/ns/fb#">
+<html>
 <head>
     <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-	<title>Camera and Video Control with HTML5 Example</title>
+	<title>Camera and Video Control with HTML5</title>
 	<style>
+		body
+		{
+			/*
+			overflow-x: hidden;
+			overflow-y: hidden;
+			*/
+		}
+		/*
+		::before
+		{
+			position:absolute;
+			left:100px;
+			top:100px;
+			width:66%;
+			height: 100px;
+			border-top: 2px solid #FF0000;
+			border-bottom: 2px solid #FF0000;
+			border-left:2px solid #FF0000;
+			border-right:2px solid #FF0000;
+			content:'';
+			z-index: 1;
+		}
+		*/
+		.main
+		{
+			margin:0 auto;
+			left:0px;
+			top:0px;
+			width:100%;
+			height:100%;
+		}
+		.ImgFrm
+		{
+			position: absolute;
+			left:20%;
+			top:100px;
+			margin:0 auto;
+			width:60%;
+			height:500px;
+			/*border:2px solid #FF0000;*/
+			outline: #FF0000 dashed thick;
+		}
 		video
 		{
 			border: 1px solid #ccc;
 			display: block;
-			margin: 0 0 20px 0;
+			width:100%;
+			margin: 0 0 0px 0;
 		}
+		/*
 		#canvas
 		{
+			position:absolute;
+			top: 10px;
+			left: 10px;
 			margin-top: 20px;
-			border: 1px solid #ccc;
+			margin-left: 20px;
+			border: 1px solid #0000FF;
 			display: block;
 		}
-		/*div:before {
-    position: absolute;
-    content:"";
-    height: 100px;
-    width: 100px;
-    border-radius: 100%;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    background-color: purple;}*/
-    div:after
-  {
-		position:absolute;
-		left:80px;
-		top:80px;
-		width:480px;
-		height:320px;
-		border-top: 2px solid #FF0000;
-		border-bottom: 2px solid #FF0000;
-		border-left:2px solid #FF0000;
-		border-right:2px solid #FF0000;
-		content:'';
-  	/*position: absolute;
-  content:url(favicon.ico);
-  top: 0;
-    left: 0;*/
-  z-index: 1;
-  }
-
+		*/
+		.btnSnap
+		{
+			margin:0 auto;
+			bottom:10px;
+			height:30px;
+			width:100%;
+			font-size:18px;
+			background:#00A0EA;
+			color:#ffffff !important;
+		}
 	</style>
-</head>
-<body>
+	<script>
+		/*
+		tagVideo = document.getElementById("video");
+		var BeforeWidth = window.getComputedStyle(document.querySelector('.promoNode'),'::after').getPropertyValue('width');
+		//window.getComputedStyle(document.querySelector('#video'),null).height="400px";
+		alert(BeforeWidth);
+		*/
 
-<div id="promoNode"></div>
+		var tagImgFrm = document.getElementsByClassName("ImgFrm");
+		var computedStyle = window.getComputedStyle(tagImgFrm);
+		computedStyle.setProperty("top", "400px", null);
+	</script>
+</head>
+
+<body>
 	<!--
 		Ideally these elements aren't created until it's confirmed that the 
 		client supports video/camera, but for the sake of illustrating the 
 		elements involved, they are created with markup (not JavaScript)
 	-->
-	<video id="video" width="640" height="480" autoplay></video>
-	<button id="snap" class="sexyButton">拍 照</button>
-	<canvas id="canvas" width="640" height="480"></canvas>
+	<div class="main">
+		<video id="video" autoplay></video>
+		<button id="snap" class="btnSnap">拍 照</button>
+		<!--canvas id="canvas" width="480" height="320"></canvas-->
+
+		<div class="ImgFrm"></div>
+	</div>
 
 	<script>
+		/*
+		var UID = {
+			_current: 0,
+			getNew: function(){
+				this._current++;
+				return this._current;
+			}
+		};
+		HTMLElement.prototype.pseudoStyle = function(element,prop,value){
+			var _this = this;
+			var _sheetId = "pseudoStyles";
+			var _head = document.head || document.getElementsByTagName('head')[0];
+			var _sheet = document.getElementById(_sheetId) || document.createElement('style');
+			_sheet.id = _sheetId;
+			var className = "pseudoStyle" + UID.getNew();
+
+			_this.className +=  " "+className;
+
+			_sheet.innerHTML += " ."+className+":"+element+"{"+prop+":"+value+"}";
+			_head.appendChild(_sheet);
+			return this;
+		};
+		 //tagVideo.pseudoStyle("before","height","400px");
+		*/
+
+		window.onload=function init(){
+		}
 
 		// Put event listeners into place
 		window.addEventListener("DOMContentLoaded", function() {
 			// Grab elements, create settings, etc.
-			var canvas = document.getElementById("canvas"),
-				context = canvas.getContext("2d"),
+			//var canvas = document.getElementById("canvas"),
+			//context = canvas.getContext("2d"),
 				video = document.getElementById("video"),
 				videoObj = { "video": true },
 				errBack = function(error) {
@@ -91,10 +162,11 @@
 				}, errBack);
 			}
 
+			/*
 			// Trigger photo take
 			document.getElementById("snap").addEventListener("click", function() {
 				context.drawImage(video, 0, 0, 640, 480);
-			});
+			});*/
 		}, false);
 
 	</script>
