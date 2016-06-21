@@ -1,103 +1,103 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-		"http://www.w3.org/TR/html4/loose.dtd">
-
-<html>
-
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:fb="http://ogp.me/ns/fb#">
 <head>
-	<meta charset="utf-8" />
-	<title>IndexPage</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+	<title>Camera and Video Control with HTML5 Example</title>
 	<style>
-		body
+		video
 		{
-			/*background-image: url("./imgs/bkground.jpg");*/
+			border: 1px solid #ccc;
+			display: block;
+			margin: 0 0 20px 0;
 		}
-		div.container
+		#canvas
 		{
-			width:100%;
-			margin:0px;
-			border:1px solid gray;
-			line-height:150%;
+			margin-top: 20px;
+			border: 1px solid #ccc;
+			display: block;
 		}
-		div.header,div.footer
-		{
-			padding:0.5em;
-			color:white;
-			background-color:gray;
-			clear:left;
-		}
-		div.content
-		{
-			height: 600px;
-			margin-left:0px;
-			border-left:1px solid gray;
-			margin: 0em;
-			padding:0em;
-		}
-		h1 a
-		{
-			text-decoration:none;
-			color: red;
-			text-align: left;
-		}
-		ul a:hover
-		{
-			background-color: yellow;
-			color: red;
-		}
-		ul
-		{
-			float:left;
-			width:100%;
-			padding:0;
-			margin:0;
-			list-style-type:none;
-			text-align: center;
-		}
-		ul a
-		{
-			float:left;
-			width:7em;
-			text-decoration:none;
-			color:white;
-			background-color:purple;
-			padding:0.2em 0.6em;
-			border-right:1px solid white;
-		}
-		ul li
-		{
-			display:inline;
-		}
-	</style>
-	<link rel="stylesheet" type="text/css" href="./css/stylesheet.css">
-</head>
+		/*div:before {
+    position: absolute;
+    content:"";
+    height: 100px;
+    width: 100px;
+    border-radius: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    background-color: purple;}*/
+    div:after
+  {
+		position:absolute;
+		left:80px;
+		top:80px;
+		width:480px;
+		height:320px;
+		border-top: 2px solid #FF0000;
+		border-bottom: 2px solid #FF0000;
+		border-left:2px solid #FF0000;
+		border-right:2px solid #FF0000;
+		content:'';
+  	/*position: absolute;
+  content:url(favicon.ico);
+  top: 0;
+    left: 0;*/
+  z-index: 1;
+  }
 
+	</style>
+</head>
 <body>
 
-	<div class="container">
-		<div class="header">
-			<h1><a href="index.htm">WebSitTest</a></h1>
-		</div>
+<div id="promoNode"></div>
+	<!--
+		Ideally these elements aren't created until it's confirmed that the 
+		client supports video/camera, but for the sake of illustrating the 
+		elements involved, they are created with markup (not JavaScript)
+	-->
+	<video id="video" width="640" height="480" autoplay></video>
+	<button id="snap" class="sexyButton">拍 照</button>
+	<canvas id="canvas" width="640" height="480"></canvas>
 
-		<div class="content">
-			<ul>
-				<li><a href="index.htm" target="_blank">Home</a></li>
-				<li><a href="./html/page1.html" target="_blank">Page1</a></li>
-				<li><a href="./html/page2.html" target="_blank">Page2</a></li>
-				<li><a href="./html/page3.html" target="_blank">Page3</a></li>
-				<li><a href="./html/page4.html" target="_blank">Page4</a></li>
-				<li><a href="./html/page5.html" target="_blank">Page5</a></li>
-				<li><a href="./html/page6.html" target="_blank">Page6</a></li>
-				<li><a href="./html/page7.html" target="_blank">Page7</a></li>
-				<li><a href="./html/page8.html" target="_blank">Page8</a></li>
-				<li><a href="./html/page9.html" target="_blank">Page9</a></li>
-			</ul>
-		</div>
+	<script>
 
-		<div class="footer">
-			Copyright 2016 by GaoHongchen.
-		</div>
-	</div>
+		// Put event listeners into place
+		window.addEventListener("DOMContentLoaded", function() {
+			// Grab elements, create settings, etc.
+			var canvas = document.getElementById("canvas"),
+				context = canvas.getContext("2d"),
+				video = document.getElementById("video"),
+				videoObj = { "video": true },
+				errBack = function(error) {
+					console.log("Video capture error: ", error.code); 
+				};
 
+			// Put video listeners into place
+			if(navigator.getUserMedia) { // Standard
+				navigator.getUserMedia(videoObj, function(stream) {
+					video.src = stream;
+					video.play();
+				}, errBack);
+			} else if(navigator.webkitGetUserMedia) { // WebKit-prefixed
+				navigator.webkitGetUserMedia(videoObj, function(stream){
+					video.src = window.webkitURL.createObjectURL(stream);
+					video.play();
+				}, errBack);
+			} else if(navigator.mozGetUserMedia) { // WebKit-prefixed
+				navigator.mozGetUserMedia(videoObj, function(stream){
+					video.src = window.URL.createObjectURL(stream);
+					video.play();
+				}, errBack);
+			}
+
+			// Trigger photo take
+			document.getElementById("snap").addEventListener("click", function() {
+				context.drawImage(video, 0, 0, 640, 480);
+			});
+		}, false);
+
+	</script>
+</div>
 </body>
-
 </html>
