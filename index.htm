@@ -6,10 +6,10 @@
 	<style>
 		body
 		{
-
+			/*
 			overflow-x: hidden;
 			overflow-y: hidden;
-
+			*/
 		}
 		/*
 		::before
@@ -70,10 +70,10 @@
 			position: fixed;
 			margin:0 auto;
 			left: 5%;
-			bottom:10px;
+			bottom:20px;
 			height:10%;
 			width:90%;
-			font-size: 18px;
+			font-size: 100%;
 			background:#00A0EA;
 			color:#ffffff !important;
 		}
@@ -84,11 +84,11 @@
 		var BeforeWidth = window.getComputedStyle(document.querySelector('.promoNode'),'::after').getPropertyValue('width');
 		//window.getComputedStyle(document.querySelector('#video'),null).height="400px";
 		alert(BeforeWidth);
-		*/
+
 
 		var tagImgFrm = document.getElementsByClassName("ImgFrm");
 		var computedStyle = window.getComputedStyle(tagImgFrm);
-		computedStyle.setProperty("top", "400px", null);
+		computedStyle.setProperty("top", "400px", null);*/
 	</script>
 </head>
 
