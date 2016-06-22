@@ -2,6 +2,10 @@
 <html>
 <head>
     <meta charset="utf-8" />
+	<meta name=" viewport"  content=" width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
 	<title>Camera and Video Control with HTML5</title>
 	<style>
 		body
@@ -24,7 +28,7 @@
 			content:'';
 			z-index: 1;
 		}
-		*/
+
 		.main
 		{
 			margin:0 auto;
@@ -32,15 +36,15 @@
 			top:0px;
 			width:100%;
 			height:100%;
-		}
+		}*/
 		.ImgFrm
 		{
 			position: absolute;
-			left:20%;
-			top:10%;
+			left:20vm;
+			top:10vm;
 			margin:0 auto;
-			width:60%;
-			height:60%;
+			width:60vm;
+			height:30vm;
 			/*border:2px solid #FF0000;*/
 			outline: #FF0000 dashed thick;
 		}
@@ -96,13 +100,12 @@
 		client supports video/camera, but for the sake of illustrating the 
 		elements involved, they are created with markup (not JavaScript)
 	-->
-	<div class="main">
+
 		<video id="video" autoplay></video>
 		<button id="snap" class="btnSnap">拍 照</button>
 		<!--canvas id="canvas" width="480" height="320"></canvas-->
 
 		<div class="ImgFrm"></div>
-	</div>
 
 	<script>
 		/*
@@ -130,7 +133,9 @@
 		 //tagVideo.pseudoStyle("before","height","400px");
 		*/
 
-		window.onload=function init(){
+		window.onload=function(){
+			//document.getElementsByClassName("ImgFrm")
+			//div.style.height=div.style.width;
 		}
 
 		// Put event listeners into place
