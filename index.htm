@@ -100,6 +100,9 @@
 
 	<script src="js/jquery.js"></script>
 	<script>
+		var viewportWidth = window.innerWidth;
+		var viewportHeight = window.innerHeight;
+
 		var box = $("#box");
 		// GYRO
 		window.ondevicemotion = function(event) {
@@ -120,13 +123,12 @@
 			beta = Math.round(event.beta);
 			gamma = Math.round(event.gamma);
 			$("#box").empty().text("b:"+beta+",g:"+gamma);
-//			box.css("left",42+gamma*0.3+"vw");
-//			box.css("top",54.5+beta*0.47+"vw");
+			box.css("left",42+gamma*0.3*viewportWidth/100);
+			box.css("top",54.5+beta*0.47*viewportWidth/100);
+//			box.css({left: 42+gamma*0.3+'vw'});
+//			box.css({top: 54.5+gamma*0.47+'vw'});
 //			box.css("left",gamma*5);
 //			box.css("top",beta*5);
-
-			box.css({left: 42+gamma*0.3+'vw'});
-			box.css({top: 54.5+gamma*0.47+'vw'});
 		}
 	</script>
 </div>
