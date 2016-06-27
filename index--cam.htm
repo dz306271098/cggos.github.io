@@ -7,7 +7,97 @@
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="format-detection" content="telephone=no">
 	<title>Camera and Video Control with HTML5</title>
-	<link rel="stylesheet" href="css/CamGyro.css">
+	<style>
+		body
+		{
+			overflow-x: hidden;
+			overflow-y: hidden;
+		}
+		/*
+		::before
+		{
+			position:absolute;
+			left:100px;
+			top:100px;
+			width:66%;
+			height: 100px;
+			border-top: 2px solid #FF0000;
+			border-bottom: 2px solid #FF0000;
+			border-left:2px solid #FF0000;
+			border-right:2px solid #FF0000;
+			content:'';
+			z-index: 1;
+		}
+		*/
+		#video
+		{
+			width:100%;
+			margin: 0 0 0px 0;
+			border: 1px solid #ccc;
+			display: block;
+		}
+		#snap
+		{
+			position: fixed;
+			margin:0 auto;
+			left: 5%;
+			bottom:20px;
+			height:10%;
+			width:90%;
+			font-size: 20px;
+			background:#00A0EA;
+			color:#ffffff !important;
+			display: block;
+		}
+		#ImgFrm
+		{
+			position: absolute;
+			left:20vw;
+			top:20vw;
+			margin:0 auto;
+			width:60vw;
+			height:85vw;
+			/*border:2px solid #FF0000;*/
+			outline: #FF0000 dashed thick;
+			display: block;
+		}
+		#canvas
+		{
+			position:absolute;
+			top: 5%;
+			left: 10%;
+			/*margin:0 auto;*/
+			width:80%;
+			height:80%;
+			border: 1px solid #0000FF;
+			/*display: block;*/
+			display: none;
+		}
+		#saveImg
+		{
+			position: fixed;
+			margin:0 auto;
+			left: 5%;
+			bottom:20px;
+			height:10%;
+			width:90%;
+			font-size: 20px;
+			background:#00A0EA;
+			color:#ffffff !important;
+			display: none;
+		}
+	</style>
+	<script>
+		/*
+		tagVideo = document.getElementById("video");
+		var BeforeWidth = window.getComputedStyle(document.querySelector('.promoNode'),'::after').getPropertyValue('width');
+		//window.getComputedStyle(document.querySelector('#video'),null).height="400px";
+		alert(BeforeWidth);
+
+		var tagImgFrm = document.getElementsByClassName("ImgFrm");
+		var computedStyle = window.getComputedStyle(tagImgFrm);
+		computedStyle.setProperty("top", "400px", null);*/
+	</script>
 </head>
 
 <body>
@@ -23,10 +113,34 @@
 	<canvas id="canvas"></canvas>
 	<button id="saveImg">保 存</button>
 
-	<div id="box"></div>
-
 	<script>
+		/*
+		var UID = {
+			_current: 0,
+			getNew: function(){
+				this._current++;
+				return this._current;
+			}
+		};
+		HTMLElement.prototype.pseudoStyle = function(element,prop,value){
+			var _this = this;
+			var _sheetId = "pseudoStyles";
+			var _head = document.head || document.getElementsByTagName('head')[0];
+			var _sheet = document.getElementById(_sheetId) || document.createElement('style');
+			_sheet.id = _sheetId;
+			var className = "pseudoStyle" + UID.getNew();
+
+			_this.className +=  " "+className;
+
+			_sheet.innerHTML += " ."+className+":"+element+"{"+prop+":"+value+"}";
+			_head.appendChild(_sheet);
+			return this;
+		};
+		 //tagVideo.pseudoStyle("before","height","400px");
+		*/
+
 		window.onload=function(){
+			//div.style.height=div.style.width;
 		}
 
 		function saveFile(data, filename) {
@@ -96,32 +210,6 @@
 			});
 		}, false);
 
-	</script>
-
-	<script src="js/jquery.js"></script>
-	<script>
-		var box = $("#box");
-		// GYRO
-		window.ondevicemotion = function(event) {
-			//ax = Math.round(Math.abs(event.accelerationIncludingGravity.x * 1));
-			//ay = Math.round(Math.abs(event.accelerationIncludingGravity.y * 1));
-			//az = Math.round(Math.abs(event.accelerationIncludingGravity.z * 1));
-			//ai = Math.round(event.interval * 100) / 100;
-			rR = event.rotationRate;
-			if (rR != null) {
-				arAlpha = Math.round(rR.alpha);
-				arBeta = Math.round(rR.beta);
-				arGamma = Math.round(rR.gamma);
-			}         }
-
-		window.ondeviceorientation = function(event) {
-			alpha = Math.round(event.alpha);
-			beta = Math.round(event.beta);
-			gamma = Math.round(event.gamma);
-			$("#box").empty().text("g:"+gamma);
-			box.css("left",gamma);
-			box.css("top",beta);
-		}
 	</script>
 </div>
 </body>
