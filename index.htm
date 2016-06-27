@@ -120,8 +120,10 @@
 			beta = Math.round(event.beta);
 			gamma = Math.round(event.gamma);
 			$("#box").empty().text("b:"+beta+",g:"+gamma);
-			box.css("left",50+gamma*0.3+"vw");
-			box.css("top",62.5+beta*0.47+"vw");
+//			box.css("left",50+gamma*0.3+"vw");
+//			box.css("top",62.5+beta*0.47+"vw");
+			box.css("left",gamma*5);
+			box.css("top",beta*5);
 		}
 	</script>
 </div>
