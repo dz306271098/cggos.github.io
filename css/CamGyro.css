@@ -93,8 +93,8 @@ body
 	transform: translate(50vw,40vh);
 	/*left: 20vw;*/
 	/*top: 20vw;*/
-	width: 60px;
-	height: 60px;
+	width: 20vw;
+	height: 20vw;
 	margin: 0 auto;
 
 	/*padding: 0px;*/
@@ -104,6 +104,6 @@ body
 	background: #FFFF00/*#ecf0f1*/;
 	color: #FF0000/*#7f8c8d*/;
 	font-size: 1.3em;
-	line-height: 10vw;
+	line-height: 20vw;
 	text-align: center;
 }
