@@ -90,13 +90,13 @@ body
 /*box-shadow: 0px 0px 26px -5px rgba(0,0,0,0.81);*/
 
 	position: absolute;
-	left: 20vw;
-	top: 20vw;
+	transform: translate(50vw,40vh);
+	/*left: 20vw;*/
+	/*top: 20vw;*/
 	width: 60px;
 	height: 60px;
 	margin: 0 auto;
 
-	/*transform: translate(10vw,10vh);*/
 	/*padding: 0px;*/
 	/*margin-left: 0px;*/
 	/*margin-top: 0px;*/
@@ -104,6 +104,6 @@ body
 	background: #FFFF00/*#ecf0f1*/;
 	color: #FF0000/*#7f8c8d*/;
 	font-size: 1.3em;
-	line-height: 60px;
+	line-height: 10vw;
 	text-align: center;
 }
