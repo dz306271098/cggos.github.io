@@ -77,9 +77,9 @@
 
 				document.getElementById("canvas").style.display="block";
 				document.getElementById("saveImg").style.display="block";
-				canvas.width = video.videoWidth;
-				canvas.height = video.videoHeight;
-				context.drawImage(video, 0, 0);
+//				canvas.width = video.videoWidth;
+//				canvas.height = video.videoHeight;
+//				context.drawImage(video, 0, 0);
 			});
 
 			//保存照片
@@ -91,8 +91,8 @@
 				document.getElementById("canvas").style.display="none";
 				document.getElementById("saveImg").style.display="none";
 
-				var image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
-				saveFile(image, 'WebCamImg_' + new Date().getTime() + '.png');
+//				var image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+//				saveFile(image, 'WebCamImg_' + new Date().getTime() + '.png');
 			});
 		}, false);
 
