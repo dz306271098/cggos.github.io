@@ -1,116 +1,139 @@
-<!DOCTYPE html>  
-<html xmlns="http://www.w3.org/1999/xhtml">  
-<head>  
-    <title>HTML5 GetUserMedia Demo</title>  
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />  
-</head>  
-<body>  
-    <input type="button" title="ø™∆Ù…„œÒÕ∑" value="ø™∆Ù…„œÒÕ∑" onclick="getMedia();" /><br />  
-    <video height="120px" autoplay="autoplay"></video><hr />  
-    <input type="button" title="≈ƒ’’" value="≈ƒ’’" onclick="getPhoto();" /><br />  
-    <canvas id="canvas1" height="120px" ></canvas><hr />  
-    <input type="button" title=" ”∆µ" value=" ”∆µ" onclick="getVedio();" /><br />  
-    <canvas id="canvas2" height="120px"></canvas>  
-  
-    <script type="text/javascript">  
-        var video = document.querySelector('video');  
-        var audio, audioType;  
-  
-        var canvas1 = document.getElementById('canvas1');  
-        var context1 = canvas1.getContext('2d');  
-  
-        var canvas2 = document.getElementById('canvas2');  
-        var context2 = canvas2.getContext('2d');  
-  
-        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;  
-        window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;  
-  
-        var exArray = []; //¥Ê¥¢…Ë±∏‘¥ID  
-        MediaStreamTrack.getSources(function (sourceInfos) {  
-            for (var i = 0; i != sourceInfos.length; ++i) {  
-                var sourceInfo = sourceInfos[i];  
-                //’‚¿Ôª·±È¿˙audio,video£¨À˘“‘“™º”“‘«¯∑÷  
-                if (sourceInfo.kind === 'video') {  
-                    exArray.push(sourceInfo.id);  
-                }  
-            }  
-        });  
-  
-        function getMedia() {  
-            if (navigator.getUserMedia) {  
-                navigator.getUserMedia({  
-                    'video': {  
-                        'optional': [{  
-                            'sourceId': exArray[1] //0Œ™«∞÷√…„œÒÕ∑£¨1Œ™∫Û÷√  
-                        }]  
-                    },  
-                    'audio':true  
-                }, successFunc, errorFunc);    //success «ªÒ»°≥…π¶µƒªÿµ˜∫Ø ˝  
-            }  
-            else {  
-                alert('Native device media streaming (getUserMedia) not supported in this browser.');  
-            }  
-        }  
-  
-        function successFunc(stream) {  
-            //alert('Succeed to get media!');  
-            if (video.mozSrcObject !== undefined) {  
-                //Firefox÷–£¨video.mozSrcObject◊Ó≥ıŒ™null£¨∂¯≤ª «Œ¥∂®“Âµƒ£¨Œ“√«ø…“‘øø’‚∏ˆ¿¥ºÏ≤‚Firefoxµƒ÷ß≥÷  
-                video.mozSrcObject = stream;  
-            }  
-            else {  
-                video.src = window.URL && window.URL.createObjectURL(stream) || stream;  
-            }  
-  
-            //video.play();  
-  
-            // “Ù∆µ  
-            audio = new Audio();  
-            audioType = getAudioType(audio);  
-            if (audioType) {  
-                audio.src = 'polaroid.' + audioType;  
-                audio.play();  
-            }  
-        }  
-        function errorFunc(e) {  
-            alert('Error£°'+e);  
-        }  
-  
-          
-        // Ω´ ”∆µ÷°ªÊ÷∆µΩCanvas∂‘œÛ…œ,Canvas√ø60ms«–ªª÷°£¨–Œ≥…»‚—€ ”∆µ–ßπ˚  
-        function drawVideoAtCanvas(video,context) {  
-            window.setInterval(function () {  
-                context.drawImage(video, 0, 0,90,120);  
-            }, 60);  
-        }  
-  
-        //ªÒ»°“Ù∆µ∏Ò Ω  
-        function getAudioType(element) {  
-            if (element.canPlayType) {  
-                if (element.canPlayType('audio/mp4; codecs="mp4a.40.5"') !== '') {  
-                    return ('aac');  
-                } else if (element.canPlayType('audio/ogg; codecs="vorbis"') !== '') {  
-                    return ("ogg");  
-                }  
-            }  
-            return false;  
-        }  
-  
-        // vedio≤•∑≈ ±¥•∑¢£¨ªÊ÷∆vedio÷°ÕºœÒµΩcanvas  
-//        video.addEventListener('play', function () {  
-//            drawVideoAtCanvas(video, context2);  
-//        }, false);  
-  
-        //≈ƒ’’  
-        function getPhoto() {  
-            context1.drawImage(video, 0, 0,90,120); //Ω´video∂‘œÛƒ⁄÷∏∂®µƒ«¯”Ú≤∂◊ΩªÊ÷∆µΩª≠≤º…œ÷∏∂®µƒ«¯”Ú£¨ µœ÷≈ƒ’’°£  
-        }  
-  
-        // ”∆µ  
-        function getVedio() {  
-            drawVideoAtCanvas(video, context2);  
-        }  
-  
-    </script>  
-</body>  
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+	<meta name=" viewport"  content=" width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+	<title>Camera and Video Control with HTML5</title>
+	<link rel="stylesheet" href="css/CamGyro.css">
+</head>
+
+<body>
+	<!--
+		Ideally these elements aren't created until it's confirmed that the 
+		client supports video/camera, but for the sake of illustrating the 
+		elements involved, they are created with markup (not JavaScript)
+	-->
+	<video id="video" autoplay></video>
+	<button id="snap">Êãç ÁÖß</button>
+	<div id="ImgFrm"></div>
+
+	<canvas id="canvas"></canvas>
+	<button id="saveImg">‰øù Â≠ò</button>
+
+	<div id="box"></div>
+
+	<script>
+		window.onload=function(){
+		}
+
+		function saveFile(data, filename) {
+			var save_link = document.createElementNS('http://www.w3.org/1999/xhtml', 'a');
+			save_link.href = data;
+			save_link.download = filename;
+
+			var event = document.createEvent('MouseEvents');
+			event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+			save_link.dispatchEvent(event);
+		}
+
+		// Put event listeners into place
+		window.addEventListener("DOMContentLoaded", function() {
+			// Grab elements, create settings, etc.
+			var canvas = document.getElementById("canvas"),
+				context = canvas.getContext("2d"),
+				video = document.getElementById("video"),
+				videoObj = { "video": true },
+				errBack = function(error) {
+					console.log("Video capture error: ", error.code); 
+				};
+
+			// Put video listeners into place
+			if(navigator.getUserMedia) { // Standard
+				navigator.getUserMedia(videoObj, function(stream) {
+					video.src = stream;
+					video.play();
+				}, errBack);
+			} else if(navigator.webkitGetUserMedia) { // WebKit-prefixed
+				navigator.webkitGetUserMedia(videoObj, function(stream){
+					video.src = window.webkitURL.createObjectURL(stream);
+					video.play();
+				}, errBack);
+			} else if(navigator.mozGetUserMedia) { // WebKit-prefixed
+				navigator.mozGetUserMedia(videoObj, function(stream){
+					video.src = window.URL.createObjectURL(stream);
+					video.play();
+				}, errBack);
+			}
+
+			// Trigger photo take
+			document.getElementById("snap").addEventListener("click", function() {
+				//document.getElementById("canvas").style.visibility = "visible";
+				document.getElementById("video").style.display="none";
+				document.getElementById("snap").style.display="none";
+				document.getElementById("ImgFrm").style.display="none";
+
+				document.getElementById("canvas").style.display="block";
+				document.getElementById("saveImg").style.display="block";
+				canvas.width = video.videoWidth;
+				canvas.height = video.videoHeight;
+				context.drawImage(video, 0, 0);
+			});
+
+			//‰øùÂ≠òÁÖßÁâá
+			document.getElementById("saveImg").addEventListener("click", function() {
+				document.getElementById("video").style.display="block";
+				document.getElementById("snap").style.display="block";
+				document.getElementById("ImgFrm").style.display="block";
+
+				document.getElementById("canvas").style.display="none";
+				document.getElementById("saveImg").style.display="none";
+
+				var image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+				saveFile(image, 'WebCamImg_' + new Date().getTime() + '.png');
+			});
+		}, false);
+
+	</script>
+
+	<script src="js/jquery.js"></script>
+	<script>
+		var viewportWidth = window.innerWidth;
+		var viewportHeight = window.innerHeight;
+
+		/*
+		window.ondevicemotion = function(event) {
+			ax = Math.round(Math.abs(event.accelerationIncludingGravity.x * 1));
+			ay = Math.round(Math.abs(event.accelerationIncludingGravity.y * 1));
+			az = Math.round(Math.abs(event.accelerationIncludingGravity.z * 1));
+			ai = Math.round(event.interval * 100) / 100;
+			rR = event.rotationRate;
+			if (rR != null) {
+				arAlpha = Math.round(rR.alpha);
+				arBeta = Math.round(rR.beta);
+				arGamma = Math.round(rR.gamma);
+			}
+		}*/
+
+		var box = $("#box");
+		window.ondeviceorientation = function(event) {
+			alpha = Math.round(event.alpha);
+			beta = Math.round(event.beta);
+			gamma = Math.round(event.gamma);
+			$("#box").empty().text("b:"+beta+",g:"+gamma);
+//			box.css("left",42+gamma*0.3*viewportWidth/100);
+//			box.css("top",54.5+beta*0.47*viewportWidth/100);
+			box.css("left",gamma*0.3*viewportWidth/100);
+			box.css("top", beta*0.472*viewportWidth/100);
+
+//			box.css({left: 42+gamma*0.3+'vw'});
+//			box.css({top: 54.5+gamma*0.47+'vw'});
+//			box.css("left",gamma*5);
+//			box.css("top",beta*5);
+		}
+	</script>
+</div>
+</body>
 </html>
