@@ -45,8 +45,8 @@
 			var canvas = document.getElementById("canvas"),
 				context = canvas.getContext("2d"),
 				video = document.getElementById("video"),
-				/*videoObj = { "video": true },*/
-				videoObj = {"video": {"mandatory": {"minWidth": "1280","minHeight": "960","minFrameRate": "30"}}},
+				videoObj = { "video": true },
+				/*videoObj = {"video": {"mandatory": {"minWidth": "1280","minHeight": "960","minFrameRate": "30"}}},*/
 				errBack = function(error) {
 					console.log("Video capture error: ", error.code); 
 				};
