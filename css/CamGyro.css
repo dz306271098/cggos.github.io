@@ -48,7 +48,7 @@ body
 	width:25vw;
 	height:35.42vw;
 	/*border:2px solid #FF0000;*/
-	outline: #FF0000 dashed thick;
+	outline: #00FF00 dashed thin;
 	display: block;
 }
 #canvas
