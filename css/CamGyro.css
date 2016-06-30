@@ -42,11 +42,11 @@ body
 #ImgFrm
 {
 	position: absolute;
-	left:20vw;
-	top:42vw;
+	left:37.5vw;
+	top:59.58vw;
 	margin:0 auto;
-	width:60vw;
-	height:85vw;
+	width:25vw;
+	height:35.42vw;
 	/*border:2px solid #FF0000;*/
 	outline: #FF0000 dashed thick;
 	display: block;
