@@ -1,20 +1,42 @@
-h2
-{
-    text-align: center;
-    color: red;
-}
 body
 {
+    margin: 0em;
     /*background-image: url("./imgs/bkground.jpg");*/
 }
 div.container
 {
     width:100%;
     margin:0px;
-    border:1px solid gray;
-    line-height:150%;
+    padding: 0px;
+    border:0px solid gray;
+
 }
-div.header,div.footer
+div.header
+{
+    width: 100%;
+    padding-bottom:0em;
+    color:white;
+    text-align: center;
+    background-color:skyblue;
+    clear:left;
+}
+div.caption a
+{
+    text-decoration:none;
+    color: red;
+    text-align: center;
+    font-size:30pt;
+    FONT-FAMILY: 华文行楷;
+}
+p.signature
+{
+    margin-top: 5px;
+    margin-bottom: 0px;
+    padding: 0px;
+    text-align: center;
+    font-size:15pt;
+}
+div.footer
 {
     padding:0.5em;
     color:white;
@@ -23,23 +45,31 @@ div.header,div.footer
 }
 div.content
 {
-    height: 600px;
+    width: 100%;
+    height: 1000px;
     margin-left:0px;
-    border-left:1px solid gray;
     margin: 0em;
     padding:0em;
 }
-h1 a
+div.left-side
 {
-    text-decoration:none;
-    color: red;
-    text-align: left;
+    background: #E6E6E6;
+    float: left;
+    height: 100%;
+    width: 20%;
+    overflow-y:auto;
 }
-ul a:hover
+div.right-side
 {
-    background-color: yellow;
-    color: red;
+    float: left;
+    height: 100%;
+    width:80%;
+    margin-left: -2px;
+    border-left:1px solid gray;
+    border-right:1px solid gray;
 }
+
+
 ul
 {
     float:left;
@@ -48,6 +78,11 @@ ul
     margin:0;
     list-style-type:none;
     text-align: center;
+    line-height:150%;
+}
+ul li
+{
+    display:inline;
 }
 ul a
 {
@@ -59,7 +94,8 @@ ul a
     padding:0.2em 0.6em;
     border-right:1px solid white;
 }
-ul li
+ul a:hover
 {
-    display:inline;
+    background-color: yellow;
+    color: red;
 }
