@@ -1,0 +1,65 @@
+h2
+{
+    text-align: center;
+    color: red;
+}
+body
+{
+    /*background-image: url("./imgs/bkground.jpg");*/
+}
+div.container
+{
+    width:100%;
+    margin:0px;
+    border:1px solid gray;
+    line-height:150%;
+}
+div.header,div.footer
+{
+    padding:0.5em;
+    color:white;
+    background-color:gray;
+    clear:left;
+}
+div.content
+{
+    height: 600px;
+    margin-left:0px;
+    border-left:1px solid gray;
+    margin: 0em;
+    padding:0em;
+}
+h1 a
+{
+    text-decoration:none;
+    color: red;
+    text-align: left;
+}
+ul a:hover
+{
+    background-color: yellow;
+    color: red;
+}
+ul
+{
+    float:left;
+    width:100%;
+    padding:0;
+    margin:0;
+    list-style-type:none;
+    text-align: center;
+}
+ul a
+{
+    float:left;
+    width:7em;
+    text-decoration:none;
+    color:white;
+    background-color:purple;
+    padding:0.2em 0.6em;
+    border-right:1px solid white;
+}
+ul li
+{
+    display:inline;
+}

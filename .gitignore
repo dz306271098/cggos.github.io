@@ -1,2 +1,5 @@
 # backup files
 *.bak
+
+# directory to ignore
+.idea
