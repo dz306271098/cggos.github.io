@@ -3,7 +3,7 @@ body
     margin: 0em;
     /*background-image: url("./imgs/bkground.jpg");*/
 }
-div.container
+#container
 {
     width:100%;
     margin:0px;
@@ -11,24 +11,24 @@ div.container
     border:0px solid gray;
 
 }
-div.header
+#header
 {
     width: 100%;
-    padding-bottom:0em;
+    padding-top:0.5em;
     color:white;
     text-align: center;
     background-color:skyblue;
     clear:left;
 }
-div.caption a
+#header a
 {
     text-decoration:none;
     color: red;
     text-align: center;
-    font-size:30pt;
+    font-size:35pt;
     FONT-FAMILY: 华文行楷;
 }
-p.signature
+#header p
 {
     margin-top: 5px;
     margin-bottom: 0px;
@@ -36,14 +36,14 @@ p.signature
     text-align: center;
     font-size:15pt;
 }
-div.footer
+#footer
 {
     padding:0.5em;
     color:white;
     background-color:gray;
     clear:left;
 }
-div.content
+#content
 {
     width: 100%;
     height: 1000px;
@@ -70,32 +70,45 @@ div.right-side
 }
 
 
-ul
+#menu ul
 {
     float:left;
     width:100%;
     padding:0;
-    margin:0;
+    margin:0 auto;
     list-style-type:none;
     text-align: center;
-    line-height:150%;
+
 }
-ul li
+#menu ul li
 {
-    display:inline;
-}
-ul a
-{
+    width: 7em;
     float:left;
-    width:7em;
+    line-height:150%;
+    border-right:1px solid white;
+}
+#menu ul li a
+{
+    display: inline-block;
+    width:100%;
     text-decoration:none;
     color:white;
     background-color:purple;
-    padding:0.2em 0.6em;
-    border-right:1px solid white;
 }
-ul a:hover
+#menu ul li a:hover
 {
     background-color: yellow;
     color: red;
+}
+#menu ul li ul li
+{
+    float: none;
+    width: 7em;
+    margin: 0px;
+}
+#menu ul li ul li a
+{
+    display: block;
+    color: black;
+    background-color:gray;
 }
