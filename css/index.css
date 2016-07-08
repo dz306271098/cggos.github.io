@@ -48,7 +48,7 @@ body
     width: 100%;
     height: 1000px;
 }
-div.left-side
+#left-side
 {
     background: #E6E6E6;
     float: left;
@@ -56,7 +56,7 @@ div.left-side
     width: 20%;
     overflow-y:auto;
 }
-div.right-side
+#right-side
 {
     float: left;
     height: 100%;
@@ -66,8 +66,33 @@ div.right-side
     border-right:1px solid gray;
 }
 
+#left-side .box
+{
+    margin:0 auto;
+    width:95%;
+    height:100px;
+    border:1px solid #000;
+    /*outline: #ffff00 dashed thick;*/
+    background-color: white;
+    overflow: hidden;
+}
+#left-side .signature
+{
+    height:80px;
+}
+#left-side .homepage
+{
+    height:120px;
+}
+#left-side p
+{
+    width: 100%;
+    margin: 0;
+    background-color: #00A0EA;
+    text-align: center;
+}
 
-#menu ul
+#right-side #menu ul
 {
     float:left;
     width:100%;
@@ -77,26 +102,26 @@ div.right-side
     text-align: center;
     overflow: hidden;
 }
-#menu ul li
+#right-side #menu ul li
 {
     width: 7em;
     float:left;
     line-height:150%;
     border-right:1px solid white;
-    background-color: #333;
+    background-color: #4CAF50;
 }
-#menu ul li a.menu1
+#right-side #menu ul li a.menu1
 {
     display: inline-block;
     width:100%;
     color: white;
     text-decoration:none;
 }
-#menu ul li a.menu1:hover
+#right-side #menu ul li a.menu1:hover
 {
     background-color: red;
 }
-.dropdown-content
+#right-side #menu .dropdown-content
 {
     display: none;
     position: absolute;
@@ -104,17 +129,27 @@ div.right-side
     background-color: #f9f9f9;
     /*box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);*/
 }
-.dropdown-content a
+#right-side #menu .dropdown-content a
 {
     display: block;
     color: black;
     text-decoration: none;
 }
-.dropdown-content a:hover
+#right-side #menu .dropdown-content a:hover
 {
     background-color: #f1f1f1
 }
-.dropdown:hover .dropdown-content
+#right-side #menu .dropdown:hover .dropdown-content
 {
     display: block;
+}
+
+#right-side #main-content
+{
+    margin:0 auto;
+    width:98%;
+    height:90%;
+    border:1px solid #000;
+    /*outline: #ffff00 dashed thick;*/
+    overflow: hidden;
 }
