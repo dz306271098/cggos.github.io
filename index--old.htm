@@ -63,14 +63,14 @@
 						<li><a href="./html/page8.html" target="_blank">Page8</a>
 						</li>
 						<li><a href="./html/page9.html" target="_blank">Page9</a>
-							<ul>
-								<li><a href="#" target="_blank">1</a></li>
-								<li><a href="#" target="_blank">2</a></li>
-								<li><a href="#" target="_blank">3</a></li>
-							</ul>
 						</li>
-						<li><a href="#" target="_blank">Links</a>
-
+						<li class="dropdown">
+							<a href="#" class="dropbtn">Dropdown</a>
+							<div class="dropdown-content">
+								<a href="#">Link 1</a>
+								<a href="#">Link 2</a>
+								<a href="#">Link 3</a>
+							</div>
 						</li>
 					</ul>
 				</div>
@@ -83,6 +83,20 @@
 		</div>
 	</div>
 
+	<script>
+		function menuFix(){
+			var lis = document.getElementById("menu").getElementsByTagName("li");
+			for(var i=0;i<lis.length();i++){
+				lis[i].onmouseover = function(){
+					this.className += (this.className.length>0 ? "." : "")+"listshow";
+				}
+				lis[i].onmouseout = function(){
+					this.className = this.className.replace("listshow","");
+				}
+			}
+		}
+		window.onload = menuFix;
+	</script>
 </body>
 
 </html>
