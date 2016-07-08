@@ -5,13 +5,13 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>IndexPage</title>
+	<title>高洪臣的主页</title>
 	<link rel="stylesheet" href="css/index.css">
 </head>
 
 <body>
 
-	<div id="container">
+<div id="container">
 
 		<div id="header">
 			<a href="index--old.htm">
@@ -30,7 +30,7 @@
 		<div id="content">
 			<div id="left-side">
 				<div class="box signature">
-					<p>个性签名</p>
+					<p class="box-title">个性签名</p>
 					<CENTER>
 						<MARQUEE direction=up behavior=alternate width=30 height=60>
 							<FONT face=隶书 size=5 color=red>爱</FONT>
@@ -51,7 +51,7 @@
 				</div>
 				<br/>
 				<div class="box homepage">
-					<p>我的主页</p>
+					<p class="box-title">我的主页</p>
 					<ul type="disc">
 						<li><a href="https://cn.linkedin.com/in/gaohongchen01/en" target="_blank">LinkedIn</a></li>
 						<li><a href="https://github.com/GaoHongchen" target="_blank">GitHub</a></li>
@@ -61,34 +61,43 @@
 				</div>
 				<br/>
 				<div class="box">
-					<p>公告</p>
+					<p class="box-title">公告</p>
+					<p>网站开发中...</p>
 				</div>
 			</div>
 			<div id="right-side">
 				<div id="menu">
 					<ul>
-						<li><a class="menu1" href="index--old.htm" target="_blank">Home</a>
-						</li>
-						<li><a class="menu1" href="./html/page1.html" target="_blank">Page1</a>
-						</li>
-						<li><a class="menu1" href="./html/page2.html" target="_blank">Page2</a>
-						</li>
-						<li><a class="menu1" href="./html/page4.html" target="_blank">Page4</a>
-						</li>
-						<li><a class="menu1" href="./html/page5.html" target="_blank">Page5</a>
-						</li>
-						<li><a class="menu1" href="./html/page8.html" target="_blank">Page8</a>
+						<li class="dropdown">
+							<a class="menu1" href="index--old.htm" target="_blank">主页</a>
 						</li>
 						<li class="dropdown">
-							<a class="menu1" href="#" class="dropbtn">Dropdown</a>
+							<a class="menu1" href="#" target="_blank">编程语言</a>
 							<div class="dropdown-content">
-								<a href="./html/page9.html" target="_blank">page9</a>
-								<a href="#">Link b</a>
-								<a href="#">Link c</a>
+								<a href="#">C++</a>
+								<a href="#">C#</a>
+								<a href="#">Java</a>
+								<a href="#">Python</a>
+								<a href="#">PHP</a>
 							</div>
 						</li>
 						<li class="dropdown">
-							<a class="menu1" href="#" class="dropbtn">Dropdown</a>
+							<a class="menu1" href="./html/page4.html" target="_blank">Page4</a>
+						</li>
+						<li class="dropdown">
+							<a class="menu1" href="./html/page5.html" target="_blank">Page5</a>
+						</li>
+						<li class="dropdown">
+							<a class="menu1" href="./html/page8.html" target="_blank">Page8</a>
+						</li>
+						<li class="dropdown">
+							<a class="menu1" href="#">Dropdown</a>
+							<div class="dropdown-content">
+								<a href="./html/page9.html" target="_blank">page9</a>
+							</div>
+						</li>
+						<li class="dropdown">
+							<a class="menu1" href="#">Dropdown</a>
 							<div class="dropdown-content">
 								<a href="#">Link 1</a>
 								<a href="#">Link 2</a>
@@ -100,7 +109,26 @@
 				<br/>
 				<br/>
 				<div id="main-content">
-
+					<table bgcolor="red">
+						<caption>Table2</caption>
+						<tr><th>H1</th><th>H2</th><th>H3</th></tr>
+						<tr><td>100</td><td>200</td><td>300</td></tr>
+						<tr><td>400</td><td>500</td><td></td></tr>
+					</table>
+					<P>
+						<MARQUEE scrollAmount=2 direction=down height=60>
+							<FONT face=华文彩云 color=#da70d6 size=6>
+								<B>朋友欢迎您的到来</B>
+							</FONT>
+						</MARQUEE>
+					</P>
+					<P>
+						<MARQUEE scrollAmount=2 direction=up height=60>
+							<FONT face=华文彩云 color=#da70d6 size=6>
+								<B>朋友欢迎您的到来</B>
+							</FONT>
+						</MARQUEE>
+					</P>
 				</div>
 			</div>
 
@@ -110,21 +138,6 @@
 			Copyright 2016 by GaoHongchen.
 		</div>
 	</div>
-
-	<script>
-		function menuFix(){
-			var lis = document.getElementById("menu").getElementsByTagName("li");
-			for(var i=0;i<lis.length();i++){
-				lis[i].onmouseover = function(){
-					this.className += (this.className.length>0 ? "." : "")+"listshow";
-				}
-				lis[i].onmouseout = function(){
-					this.className = this.className.replace("listshow","");
-				}
-			}
-		}
-		window.onload = menuFix;
-	</script>
 </body>
 
 </html>
