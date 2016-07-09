@@ -30,12 +30,13 @@ body
 }
 #header p
 {
-    margin-top: 5px;
+    margin-top: 0px;
     margin-bottom: 0px;
     padding: 0px;
     text-align: center;
     font-size:15pt;
 }
+
 #footer
 {
     padding:0.5em;
