@@ -1,12 +1,18 @@
 # GaoHongchen.github.io
 
-WebSiteTest:
+My WebSite:
 [http://gaohongchen.github.io/](http://gaohongchen.github.io/ "WebSiteTest")
 
 ----------
 
-通过w3cschool教程进行学习，练习编写Demo，开发了现在的网站，里面用到的技术主要如下：
+## Summary
+
+With the tutorial of w3school,I studied technology of Front End,which is as following.
 
 * HTML 
 * CSS 
 * JavaScript
+
+## Linking
+
+* [http://www.w3school.com.cn/](http://www.w3school.com.cn/ "w3school在线教程")
