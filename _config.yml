@@ -13,19 +13,38 @@
 # you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
-title: GaoHongchen's website
-email: gaohongchen01@163.com
-description: Your attitude, not your aptitude, will determine your altitude! > # this means to ignore newlines until "baseurl:"
+title: GaoHongchen's Blog
+email: gaohongchen01@outlook.com
+description: Stay hungry,Stay foolish! # this means to ignore newlines until "baseurl:"
+
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
+
 # twitter_username: jekyllrb
 github_username:  GaoHongchen
+social_media:
+  github_url: https://github.com/GaoHongchen
+  weibo_url: http://weibo.com/gaohongchen01
+  zhihu_url: https://www.zhihu.com/people/gaohongchen01
+  # twitter_url: https://twitter.com/
+  lofter_url: http://gaohongchen01.lofter.com/
 
 # Build settings
 markdown: kramdown
-theme: jekyll-theme-slate
+# theme: minima #jekyll-theme-slate
 plugins:
   - jekyll-feed
+  - jekyll-paginate
+paginate: 5
+paginate_path: "/pages:num/"
+
+mathjax: false
+
+excerpt_separator: <!-- more -->
+
+permalink: /:categories/:title.html
+
+author: GaoHongchen
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
