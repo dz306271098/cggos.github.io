@@ -40,7 +40,7 @@ plugins:
 paginate: 5
 paginate_path: "/pages:num/"
 
-mathjax: false
+mathjax: true
 
 excerpt_separator: <!-- more -->
 
