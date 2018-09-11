@@ -33,14 +33,17 @@ social_media:
 
 # Build settings
 markdown: kramdown
+
+mathjax: true
+
 # theme: minima #jekyll-theme-slate
+
 plugins:
   - jekyll-feed
   - jekyll-paginate
+
 paginate: 5
 paginate_path: "/pages:num/"
-
-mathjax: true
 
 excerpt_separator: <!-- more -->
 
