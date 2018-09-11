@@ -6,8 +6,6 @@ categories: SLAM
 tags: [SLAM, 3D Reconstruction, Stereo Vision]
 ---
 
-{% include mathjax.html %}
-
 # Overview
 **[LIBVISO2 (Library for Visual Odometry 2)](http://www.cvlibs.net/software/libviso/)** is a very fast cross-platfrom (Linux, Windows) C++ library with MATLAB wrappers for computing the 6 DOF motion of **a moving mono/stereo camera**.
 
