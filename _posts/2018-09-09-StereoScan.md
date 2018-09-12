@@ -64,7 +64,8 @@ A **’circle match’** gets accepted, if the last feature coincides with the f
 * make use of **the epipolar constraint** using an error tolerance of **1 pixel** when **matching between the left and right images**
 * Accept if last feature coincides with first feature
 
-**Fast feature matching:**  
+
+## Fast Feature Matching
 * 1st: Match a sparse set of interest points within each class
 * Build statistics over likely displacements within each bin
 * Use this statistics for speeding up 2nd matching stage
@@ -74,45 +75,147 @@ A **’circle match’** gets accepted, if the last feature coincides with the f
 # Egomotion Estimation
 ![Egomotion.png](../images/StereoScan/Egomotion.png)
 
+## Features Bucketing
+keeps only max_features per bucket, where the domain is split into buckets of size (bucket_width,bucket_height).
+
+* **reduce the number of features** (in practice we retain between 200 and 500 features)
+* **spread them uniformly over the image domain**
+
+## 3D Points Calcuation
+
+* **disparity**
+
+$$
+d = max(u_l - u_r, 0.001)
+$$
+
+* **Stereo Baseline**
+
+$$
+B = stereomodel.baseline
+$$
+
+* **3d points**
+
+$$
+\begin{aligned}
+	\begin{cases}
+  	Z = \frac{f \cdot B}{d}       \\
+  	X = (u-c_u) \cdot \frac{B}{d} \\
+  	Y = (v-c_v) \cdot \frac{B}{d}
+	\end{cases}
+\end{aligned}
+$$
+
 ## Projection Model
 
 Assuming squared pixels and zero skew, **the reprojection** into the current image is given by
-![ReprojectionEquation.png](../images/StereoScan/ReprojectionEquation.png)
 
-## Minimize reprojection errors(GN & RANSAC)
+$$
+\begin{bmatrix} u_c \\ v_c \\ 1 \end{bmatrix} =
+\begin{bmatrix}
+f & 0 & c_u \\
+0 & f & c_v \\
+0 & 0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+(\mathbf{R}(r) \quad \mathbf{t})
+\left( \begin{array}{cccc} X_p \\ Y_p \\ Z_p \end{array} \right) -
+\left( \begin{array}{cccc} s \\ 0 \\ 0 \end{array} \right)
+\end{bmatrix}
+$$
 
-reprojection errors:  
+* homogeneous image coordinates $(u_c \quad v_c \quad 1 )^T$
+* focal length $f$
+* principal point $(c_u, c_v )$
+* rotation matrix $\mathbf{R}(r) = \mathbf{R}_x (r_x ) \mathbf{R}_y(r_y) \mathbf{R}_z(r_z)$
+* translation vector $\mathbf{t} = (t_x \quad t_y \quad t_z )$
+* 3d point coordinates $\mathbf{P} = (X_p \quad Y_p \quad Z_p)$
+* shift $s = 0$ (left image), $s = baseline$ (right image)
+
+## Minimize Reprojection Errors
+
+Compute the camera motion by minimizing the sum of reprojection errors iteratly by using **Gauss-Newton optimization and RANSAC**.
+
+* reprojection errors
+
 $$
 \begin{aligned}
 r(\beta)
 =&
 (r_0, r_1, r_2, \cdots, r_{11}) \\
 =&
+( r_{u_{0l}}, r_{v_{0l}}, r_{u_{0r}}, r_{v_{0r}},
+  r_{u_{1l}}, r_{v_{1l}}, r_{u_{1r}}, r_{v_{1r}},
+  r_{u_{2l}}, r_{v_{2l}}, r_{u_{2r}}, r_{v_{2r}} ) \\
+=&
+\sum_{i=1}^N {\| p_i^{(l)} - p_i'^{(l)} \|}^2 + {\| p_i^{(r)} - p_i'^{(r)} \|}^2\\
+=&
 \sum_{i=1}^N
-{\| x_i^{(l)} - \pi^{(l)}(X_i; R,t) \|}^2 +
-{\| x_i^{(r)} - \pi^{(r)}(X_i; R,t) \|}^2 \\
+{\| p_i^{(l)} - \pi^{(l)}(P_i; R,t) \|}^2 +
+{\| p_i^{(r)} - \pi^{(r)}(P_i; R,t) \|}^2 \\
 =&
 \sum_{i=1}^3
 (u_i^l-u^l)^2 + (v_i^l-v^l)^2 + (u_i^r-u^r)^2 + (v_i^r-v^r)^2
 \end{aligned}
 $$
 
-Optimization parameters vector:  
+* Optimization parameters vector
+
 $$
 \beta = (r_x, r_y, r_z, t_x, t_y, t_z)
 $$
 
-Jocobians Matrix:  
+* Jocobians Matrix
+
 $$
-J_{12 \times 6} = \frac{\partial{r(\beta)}}{\partial{\beta}}
+J_{2 \times 2 \times 6 \times 3} = \frac{\partial{r(\beta)}}{\partial{\beta}}
 $$
 
-Parameter iteration:  
+* Parameter iteration
+
 $$
 \beta_i = \beta_{i-1} - (J^TJ)^{-1} \cdot J^T r(\beta_{i-1})
 $$
 
-## Kalman Filter (constant acceleration model)
+### Jacobian Matrix Compute
+
+$$
+\begin{aligned}
+J_{2 \times 6}
+=&
+\frac{\partial(r_{u_{0l}}, r_{v_{0l}})}{\partial \beta} \\
+=&
+J_1 \cdot J_2 \cdot J_3 \\
+=&
+\frac{ \partial{ (p^{(l)} - p'^{(l)}) } }{ \partial{ p'^{(l)} } } \cdot
+\frac{ \partial{ p'^{(l)} } }{ \partial{P'^{(l)}} } \cdot
+\frac{ \partial{ P'^{(l)} } }{ \partial \beta} \\
+=&
+I \cdot
+\begin{bmatrix}
+\frac{f}{Z'} & 0 & -\frac{f}{Z'^2} X' \\
+0 & \frac{f}{Z'} & -\frac{f}{Z'^2} Y'
+\end{bmatrix} \cdot
+\begin{bmatrix}
+\frac{\partial \mathbf R}{\partial r_x} X_p &
+\frac{\partial \mathbf R}{\partial r_y} X_p &
+\frac{\partial \mathbf R}{\partial r_z} X_p &
+1 & 0 & 0 \\
+\frac{\partial \mathbf R}{\partial r_x} Y_p &
+\frac{\partial \mathbf R}{\partial r_y} Y_p &
+\frac{\partial \mathbf R}{\partial r_z} Y_p &
+0 & 1 & 0 \\
+\frac{\partial \mathbf R}{\partial r_x} Z_p &
+\frac{\partial \mathbf R}{\partial r_y} Z_p &
+\frac{\partial \mathbf R}{\partial r_z} Z_p &
+0 & 0 & 1
+\end{bmatrix}
+\end{aligned}
+$$
+
+## Kalman Filter
+refine the obtained velocity estimates by means of a Kalman filter(constant acceleration model)
 
 # Stereo Matching
 Stereo matching stage takes the output of the feature matching stage and builds a disparity
