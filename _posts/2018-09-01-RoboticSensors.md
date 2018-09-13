@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Sensors in Robotics"
-date: 2018-09-11
+date: 2018-09-01
 categories: Sensors
 tags: [Robotics, Sensors]
 ---

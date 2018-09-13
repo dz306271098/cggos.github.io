@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "世界上最伟大的十个公式"
-date: 2018-09-13
+date: 2017-09-01
 categories: Math
 tags: [Math]
 ---
