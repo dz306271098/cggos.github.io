@@ -13,23 +13,41 @@ tags: [Robotics, Sensors]
 * [Accessing the Video Device](https://www.tldp.org/HOWTO/Webcam-HOWTO/dev-intro.html)
 * v4l2-ctl
 * viewer: [GTK+ UVC Viewer](http://guvcview.sourceforge.net/index.html)
-
-Create Video Device(/dev/video1):   
-```
-sudo mknod /dev/video1 c 81 1
-sudo chmod 666 /dev/video1
-sudo chgrp video /dev/video1
-```
+* Create Video Device ( /dev/video1 )
+  ```
+  sudo mknod /dev/video1 c 81 1
+  sudo chmod 666 /dev/video1
+  sudo chgrp video /dev/video1
+  ```
 
 ## Types
+
+* [The IEEE1394/USB3 Digital Camera List](https://damien.douxchamps.net/ieee1394/cameras/)
+
+### Kinect
+* [Kinect for windows微软中国体感官方网站](http://www.k4w.cn/)
+* [OpenKinect](https://openkinect.org/wiki/Main_Page) is an open community of people interested in making use of the amazing Xbox Kinect hardware with our PCs and other devices.
+* [Kinect V1 and Kinect V2 fields of view compared](http://smeenk.com/kinect-field-of-view-comparison/)
+* [Ubuntu + Kinect + OpenNI + PrimeSense](http://mitchtech.net/ubuntu-kinect-openni-primesense/)
+* [翻译】Kinect v1和Kinect v2的彻底比较](http://www.cnblogs.com/TracePlus/p/4136297.html)
+* [code-iai/iai_kinect2](https://github.com/code-iai/iai_kinect2): Tools for using the Kinect One (Kinect v2) in ROS
+
+### Realsense Camera
+* [realsense_camera (ROS Wiki)](http://wiki.ros.org/realsense_camera)
+* [Intel® RealSense­™ Camera ZR300](https://software.intel.com/en-us/realsense/zr300)
 
 ### Orbbec Astra Camera
 * [astra_camera (ROS Wiki)](http://wiki.ros.org/astra_camera)
 * [ROS wrapper for Astra camera](https://github.com/orbbec/ros_astra_camera)
 
-### Realsense Camera
-* [realsense_camera (ROS Wiki)](http://wiki.ros.org/realsense_camera)
-* [Realsense概览](https://blog.csdn.net/app_12062011/article/details/52662143)
+### ASUS Xtion 2
+* https://www.asus.com/3D-Sensor/
+
+### ZED Stereo Camera
+* [StereoLabs](https://www.stereolabs.com/)
+
+### Event Camera
+* [Event Camera动态视觉传感器，让无人机用相机低成本进行导航](https://www.leiphone.com/news/201709/LkfPqS60ZYgmXk8x.html)
 
 
 ## Calibration
@@ -121,3 +139,14 @@ This C++ library supports the following tasks:
 1. Intrinsic calibration of a generic camera.  
 2. Extrinsic self-calibration of a multi-camera rig for which odometry data is provided.  
 3. Extrinsic infrastructure-based calibration of a multi-camera rig for which a map generated from task  2 is provided.
+
+
+-----
+
+# 6. Synchronization
+* [ROS CAMERA AND IMU SYNCHRONIZATION](http://grauonline.de/wordpress/?page_id=1951)
+
+
+-----
+
+# 7. Sensors Fusion
