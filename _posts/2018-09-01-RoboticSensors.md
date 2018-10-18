@@ -34,25 +34,28 @@ tags: [Robotics, Sensors]
 ### [CMUcam](http://www.cmucam.org/)
 **Open Source Programmable Embedded Color Vision Sensors**, The first CMUcam made its splash in 1999 as a CREATE Lab project.
 
-* [The CMUcam1 Vision Sensor](https://www.cs.cmu.edu/~cmucam/qanda.html)
+* [The CMUcam1 Vision Sensor](https://www.cs.cmu.edu/~cmucam/qanda.html)  
 ![CMUcam1_B.JPG](../images/Sensors/CMUcam1_B.JPG)
 
 #### [Pixy](https://pixycam.com/)
+
 ![pixy_cam.jpg](../images/Sensors/pixy_cam.jpg)
+
 **Pixy** is **the fifth version of the CMUcam, or CMUcam5**, but “Pixy” is easier to say than CMUcam5, so the name more or less stuck.  Pixy got its start in 2013 as part of a successful Kickstarter campaign, and as a partnership between **Charmed Labs** and **CMU**.
 
-**Pixy2** was announced recently as Pixy’s smaller, faster, and smarter younger sibling.
+**Pixy2** was announced recently as Pixy’s smaller, faster, and smarter younger sibling.  
 ![pixy2_cam.jpg](../images/Sensors/pixy2_cam.jpg)
 
 ### [OpenMV](https://openmv.io/)
 The OpenMV(**Open-Source Machine Vision**) project aims at making machine vision more accessible to beginners by developing a user-friendly, open-source, low-cost **machine vision platform**.  
 
-OpenMV cameras are programmable in **Python3** and come with an extensive set of **image processing functions** such as face detection, keypoints descriptors, color tracking, QR and Bar codes decoding, AprilTags, GIF and MJPEG recording and more.
+OpenMV cameras are programmable in **Python3** and come with an extensive set of **image processing functions** such as face detection, keypoints descriptors, color tracking, QR and Bar codes decoding, AprilTags, GIF and MJPEG recording and more.  
 
 ![openmv_cam.jpg](../images/Sensors/openmv_cam.jpg)
 
 ### [NXTCam-v4](http://www.mindsensors.com/ev3-and-nxt/14-vision-subsystem-camera-for-nxt-or-ev3-nxtcam-v4)
-Vision Subsystem - Camera for NXT or EV3 (NXTCam-v4)
+Vision Subsystem - Camera for NXT or EV3 (NXTCam-v4)  
+
 ![nxtcam_v4.jpg](../images/Sensors/nxtcam_v4.jpg)
 
 ## Typical Cameras
