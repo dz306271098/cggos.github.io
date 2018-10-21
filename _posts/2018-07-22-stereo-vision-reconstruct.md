@@ -72,7 +72,7 @@ $$
 通过 $P_2$ 可计算出 **基线** 长度:
 $$
 \begin{aligned}
-    baseline = - T_x = - \frac{{P_2}_{03}}{f_x}
+    baseline = - T_x = - \frac{ {P_2}_{03} }{f_x}
 \end{aligned}
 $$
 
