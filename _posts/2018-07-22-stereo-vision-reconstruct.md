@@ -3,21 +3,14 @@ layout: post
 title: "双目立体视觉三维重建"
 date: 2018-07-22
 categories: ComputerVision
-tags: [StereoVision, 3D Reconstruct]
+tags: [Stereo Vision, 3D Reconstruction]
 ---
 
  [TOC]
 
- 双目立体视觉的整体流程包括：图像获取、双目标定、双目矫正、立体匹配、三维重建。
-![stereo_vision_model_01.png](../images/stereo_vision/stereo_vision_model_01.png)
+![stereo_vision_system.png](../images/stereo_vision/stereo_vision_system.png)
 
-* [Stereo Vision](https://sites.google.com/site/5kk73gpu2010/assignments/stereo-vision#TOC-Update-Disparity-Map)
-* [OpenCV+OpenGL 双目立体视觉三维重建](https://blog.csdn.net/wangyaninglm/article/details/52142217)
-* [OpenCV 双目测距（双目标定、双目校正和立体匹配）](https://blog.csdn.net/wangchao7281/article/details/52506691?locationNum=7)
-* [真实场景的双目立体匹配（Stereo Matching）获取深度图详解](https://www.cnblogs.com/riddick/p/8486223.html)
-* [Calculating a depth map from a stereo camera with OpenCV](https://albertarmea.com/post/opencv-stereo-camera/)
-* [Stereo Vision Tutorial](http://mccormickml.com/2014/01/10/stereo-vision-tutorial-part-i/)
-* [Literature Survey on Stereo Vision Disparity Map Algorithms](https://www.hindawi.com/journals/js/2016/8742920/)
+双目立体视觉的整体流程包括：图像获取、双目标定、双目矫正、立体匹配、三维重建。  
 
 -----
 
@@ -79,6 +72,8 @@ $$
 * [ethz-asl/image_undistort](https://github.com/ethz-asl/image_undistort): A compact package for undistorting images directly from kalibr calibration files. Can also perform dense stereo estimation.
 
 # 立体匹配
+
+![stereo_vision_model_01.png](../images/stereo_vision/stereo_vision_model_01.png)
 
 ## 视差计算
 通过 OpenCV函数 **stereoBM** (block matching algorithm)，生成 **视差图(Disparity Map)** (CV_16S or CV_32F)
