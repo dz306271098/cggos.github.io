@@ -42,8 +42,10 @@ tags: [Sensor Calibration]
 
 ## 输出 cam_chain.yaml
 
-* 单目
-  sample file output:
+* 单目  
+
+  sample file output:  
+
   ```yaml
   cam_overlaps: []
     camera_model: pinhole
@@ -54,8 +56,10 @@ tags: [Sensor Calibration]
     rostopic: /camera/fisheye/image_raw
   ```
 
-* 双目
-  sample file output:
+* 双目  
+
+  sample file output:  
+
   ```yaml
   cam0:
     cam_overlaps: [1]
@@ -79,8 +83,6 @@ tags: [Sensor Calibration]
     resolution: [752, 480]
     rostopic: /stereo/right/image_raw
   ```
-
-* 双目
 
 
 # 2. 标定 IMU
@@ -116,7 +118,7 @@ roslaunch imu_utils ZR300.launch
 </launch>
 ```
 
-输出 **ZR300_imu_param.yaml**，sample file output:
+输出 **ZR300_imu_param.yaml**，sample file output:  
 
 ```yaml
 %YAML:1.0
@@ -196,8 +198,10 @@ update_rate:                 200.0      #Hz (for discretization of the values ab
 
 ## 输出 camchain-imucam.yaml
 
-* 双目 + IMU
-  sample file output:  
+* 双目 + IMU  
+
+  sample file output:   
+
   ```yaml
   cam0:
     T_cam_imu:
