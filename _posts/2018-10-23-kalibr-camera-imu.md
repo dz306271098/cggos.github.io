@@ -14,6 +14,8 @@ tags: [Sensor Calibration]
 * **Camera-IMU calibration**: spatial and temporal calibration of an IMU w.r.t a camera-system
 * **Rolling Shutter Camera calibration**: full intrinsic calibration (projection, distortion and shutter parameters) of rolling shutter cameras
 
+本文以 **单目+IMU** 和 **双目+IMU** 为例，讲解使用 **Kalibr工具** 标定 **Camera-IMU**，其中使用的摄像头分别为 **Realsense ZR300** 和 **MYNT-EYE S系列摄像头**。
+
 # 1. 标定 Camera
 
 ## kalibr_calibrate_cameras
@@ -21,24 +23,44 @@ tags: [Sensor Calibration]
 ### 采集 images
 
 * 单目
-  ```
+
+  ```bash
   rosbag record /camera/fisheye/image_raw -O images.bag
   ```
 
 * 双目
-  ```
+
+  ```bash
   rosbag record /stereo/left/image_raw /stereo/right/image_raw -O images.bag
   ```
 
 ### 标定 Camera
 
 * 单目
-  > kalibr_calibrate_cameras --target april_6x6_50x50cm.yaml --bag images.bag --models pinhole-fov --topics /camera/fisheye/image_raw
+
+  ```bash
+  kalibr_calibrate_cameras \
+      --target april_6x6_24x24mm.yaml \
+      --bag images.bag \
+      --models pinhole-fov \
+      --topics /camera/fisheye/image_raw
+  ```
 
 * 双目
-  > kalibr_calibrate_cameras --target april_6x6_50x50cm.yaml --bag images.bag --models pinhole-radtan pinhole-radtan --topics /stereo/left/image_raw /stereo/right/image_raw
+
+  ```bash
+  kalibr_calibrate_cameras \
+      --target april_6x6_24x24mm.yaml \
+      --bag images.bag \
+      --models pinhole-radtan pinhole-radtan \
+      --topics /stereo/left/image_raw /stereo/right/image_raw
+  ```
 
 ## Other Camera Calib Tools
+
+* ROS camera_calibration
+* PTAM Calibration ( ATAN / FOV camera model )
+* OCamCalib toolbox
 
 ## 输出 cam_chain.yaml
 
@@ -93,13 +115,13 @@ tags: [Sensor Calibration]
 
 * collect the data while the IMU is **Stationary**, with a **two hours** duration
 
-```
+```bash
 rosbag record /camera/imu/data_raw -O imu.bag
 ```
 
 ### 标定 IMU
 
-```
+```bash
 rosbag play -r 200 imu.bag
 roslaunch imu_utils ZR300.launch
 ```
@@ -180,23 +202,56 @@ update_rate:                 200.0      #Hz (for discretization of the values ab
 ## 采集 images & imu 数据
 
 * 单目 + IMU
-  ```
+
+  ```bash
   rosbag record /camera/imu/data_raw /camera/fisheye/image_raw -O images_imu.bag
   ```
 
 * 双目 + IMU
-  ```
+
+  ```bash
   rosbag record /camera/imu/data_raw /stereo/left/image_raw /stereo/right/image_raw -O images_imu.bag
   ```
 
 ## 标定
 
-> kalibr_calibrate_imu_camera --target april_6x6_50x50cm.yaml --bag images_imu.bag --bag-from-to 5 45 --cam camchain.yaml --imu imu.yaml --time-calibration --imu-models scale-misalignment --timeoffset-padding 0.1
+```bash
+kalibr_calibrate_imu_camera \
+    --target april_6x6_24x24mm.yaml \
+    --bag images_imu.bag \
+    --bag-from-to 5 45 \
+    --cam camchain.yaml \
+    --imu imu.yaml \
+    --imu-models scale-misalignment \
+    --time-calibration \
+    --timeoffset-padding 0.1
+```
 
 * **--time-calibration**: the **temporal calibration** is turned off by default and can be enabled using the argument
 * **--bag-from-to 5 45**: because there are shocks in the dataset (sensor pick-up/lay-down), only the data between 5 to 45 s is used
 
 ## 输出 camchain-imucam.yaml
+
+* 单目 + IMU
+
+  sample file output:  
+
+  ```yaml
+  cam0:
+    T_cam_imu:
+    - [0.9996455719455962, 0.02441693761016358, -0.010608659071806014, -0.15423539234968817]
+    - [-0.024769907516072436, 0.9990969029165591, -0.03452289478279192, -0.0032297199459559245]
+    - [0.00975613505470538, 0.03477343440443987, 0.9993476002315277, 0.150153755143352]
+    - [0.0, 0.0, 0.0, 1.0]
+    cam_overlaps: []
+    camera_model: pinhole
+    distortion_coeffs: [0.9183540411447179]
+    distortion_model: fov
+    intrinsics: [252.40344712951838, 253.29272771389083, 310.9288373770512, 227.37425906476517]
+    resolution: [640, 480]
+    rostopic: /camera/fisheye/image_raw
+    timeshift_cam_imu: 0.7904787918609288
+  ```
 
 * 双目 + IMU  
 
