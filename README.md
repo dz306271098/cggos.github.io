@@ -1,11 +1,9 @@
-# GaoHongchen.github.io
-
-My WebSite using GitHub.
+# GaoHongchen's Website
 
 ----------
 
 ## Summary
-With the tutorial of w3school,I studied technology of Front End,which is as following.
+With the tutorial of w3school, I studied technology of Front End,which is as following.
 
 * HTML
 * CSS
