@@ -1,1 +1,0 @@
-# Directory of JavaScript files
