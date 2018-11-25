@@ -65,17 +65,22 @@ $$
 #### 旋转向量（轴角）
 
 $$
-\boldsymbol{\xi} = log(\mathbf{R})^{\vee}
+\boldsymbol{\xi} = \alpha\mathbf{a} = log(\mathbf{R})^{\vee} \in \mathbb{R}^3
 $$
 
-* 旋转轴（单位矢量）
+* **旋转轴**：矩阵 $\mathbf{R}$ 特征值1对应的特征向量（单位矢量）
 $$
-\mathbf{a} = \frac{\boldsymbol{\xi}}{||\boldsymbol{\xi}||}
+\mathbf{a} = \frac{\boldsymbol{\xi}}{||\boldsymbol{\xi}||} \in \mathbb{R}^3
 $$
 
-* 旋转角
+* **旋转角**
 $$
-\alpha = ||\boldsymbol{\xi}||
+\alpha = ||\boldsymbol{\xi}|| = arccos(\frac{tr(\mathbf{R})-1}{2}) \in \mathbb{R}
+$$
+
+罗德里格斯公式（[Rodrigues' rotation formula](https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula)）：
+$$
+\mathbf{R} = cos\alpha \mathbf{I} + (1-cos\alpha) \mathbf{aa}^T + sin\alpha \mathbf{a}^{\wedge}
 $$
 
 #### 单位四元数
