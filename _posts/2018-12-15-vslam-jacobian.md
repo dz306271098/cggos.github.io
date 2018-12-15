@@ -12,9 +12,7 @@ tags: [SLAM, Math]
 
 SLAM，即 **同时定位与建图**，视觉SLAM的 定位 即 求取相机位姿（旋转和平移 $[\mathbf{R} \quad \mathbf{t}]$）；在SLAM中，我们一般使用 **李代数 $\boldsymbol{\xi}$** 来表示 旋转和平移。  
 
-<div align=center>
-  <img src="../images/stereo_vision/epipolar_geometry.png">
-</div>
+![epipolar_geometry.png](../images/stereo_vision/epipolar_geometry.png)
 
 * 记 相机内参矩阵 $\mathbf{K}$，相机位姿 $\mathbf{T} = [\mathbf{R} \quad \mathbf{t}]$ (or $\boldsymbol{\xi}$)
 * 记 $I_1$ 的图像坐标系下，一像素点 $\mathbf{p}(u,v)$；在 $O_1$ 相机坐标系下，其对应的 三维点 $\mathbf{P}(X,Y,Z)$
@@ -125,7 +123,7 @@ $$
 r(\boldsymbol{\xi}) = \mathbf{p}' - \mathbf{p}
 $$
 
-由于对于一个特定的像素点，\mathbf{p} 是关于 $\boldsymbol{\xi}$ 的常量，所以
+由于对于一个特定的像素点，$\mathbf{p}$ 是关于 $\boldsymbol{\xi}$ 的常量，所以
 
 $$
 \mathbf{J}_0 = \frac{\partial \mathbf{p}'}{\partial \mathbf{p}'} = 1
