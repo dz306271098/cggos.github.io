@@ -63,13 +63,13 @@ $$
 $$
 
 通过 $P_2$ 可计算出 **基线** 长度:
+
 $$
 \begin{aligned}
     baseline = - T_x = - \frac{ {P_2}_{03} }{f_x}
 \end{aligned}
 $$
 
-* [ethz-asl/image_undistort](https://github.com/ethz-asl/image_undistort): A compact package for undistorting images directly from kalibr calibration files. Can also perform dense stereo estimation.
 
 # 立体匹配
 
@@ -79,7 +79,7 @@ $$
 通过 OpenCV函数 **stereoBM** (block matching algorithm)，生成 **视差图(Disparity Map)** (CV_16S or CV_32F)
 
 > disparity map from stereoBM of OpenCV :
-> It has the same size as the input images. When disptype==CV_16S, the map is a 16-bit signed single-channel image, containing disparity values scaled by 16. To get the true disparity values from such fixed-point representation, you will need to divide each disp element by 16. If disptype==CV_32F, the disparity map will already contain the real disparity values on output.
+> It has the same size as the input images. When disptype == CV_16S, the map is a 16-bit signed single-channel image, containing disparity values scaled by 16. To get the true disparity values from such fixed-point representation, you will need to divide each disp element by 16. If disptype == CV_32F, the disparity map will already contain the real disparity values on output.
 
 So if you've chosen **disptype = CV_16S** during computation, you can access a pixel at pixel-position (X,Y) by: `short pixVal = disparity.at<short>(Y,X);`, while the disparity value is `float disparity = pixVal / 16.0f;`; if you've chosen **disptype = CV_32F** during computation, you can access the disparity directly: `float disparity = disparity.at<float>(Y,X);`
 
@@ -93,11 +93,13 @@ So if you've chosen **disptype = CV_16S** during computation, you can access a p
 ![stereo_vision_model_02.png](../images/stereo_vision/stereo_vision_model_02.png)
 
 深度计算公式如下，通过遍历图像生成 **深度图**
+
 $$
 \begin{aligned}
 	Z = depth = \frac{f_x \cdot baseline}{disparity}
 \end{aligned}
 $$
+
 其中，$disparity$ 代表 视差图 坐标值  
 
 ### 图像类型
@@ -105,7 +107,9 @@ $$
 * 单位millimeter --> 16UC1
 
 ## 三维点坐标计算
+
 * 根据 **小孔成像模型**，已知 $Z$ 和 **相机内参** 可计算出 三维点坐标，从而生成 **三维点云**
+
 $$
 \begin{aligned}
 	\begin{cases}
