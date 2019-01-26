@@ -1,14 +1,15 @@
 ---
 layout: post
-title:  "相机投影模型以及畸变模型"
+title:  "针孔相机投影模型以及畸变模型"
 date:   2017-07-02
 categories: ComputerVision
 tags: [Camera Model]
 ---
 
-[toc]
+[TOC]
 
 # 世界坐标系 到 像素坐标系
+
 世界坐标系中三维点 $M=[X,Y,Z]^T$ 和 像素坐标系中二维点 $m=[u,v]^T$ 的关系为：
 $$ s\tilde{m} = A [R \quad t] \tilde{M}$$
 即（针孔相机模型）  
@@ -28,9 +29,13 @@ $$
 
 其中，$s$ 为缩放因子，$A$ 为相机的内参矩阵，$[R \quad t]$ 为相机的外参矩阵，$\tilde{m}$ 和 $\tilde{M}$ 分别为 $m$ 和 $M$ 对应的齐次坐标。
 
-# 针孔相机模型 (pinhole)
+# 针孔相机模型
+
 相机将三维世界中的坐标点（单位：米）映射到二维图像平面（单位：像素）的过程能够用一个几何模型来描述，其中最简单的称为 **针孔相机模型 (pinhole camera model)** ，其框架如下图所示。
-![pinhole_camera_model.png](../images/camera_model/pinhole_camera_model.png)
+
+<div align=center>
+  <img src="../images/camera_model/pinhole_camera_model.png">
+</div>
 
 ## 世界坐标系 到 相机坐标系
 
@@ -44,6 +49,7 @@ R \left[\begin{array}{c}X_w\\Y_w\\Z_w\end{array}\right] + t =
 $$
 
 ## 相机坐标系 到 像素坐标系
+
 根据三角形相似关系，有  
 
 $$
@@ -114,7 +120,9 @@ u = f_x \frac{X_c}{Z_c} + c_x \\[2ex]
 v = f_y \frac{Y_c }{Z_c} + c_y
 \end{cases}
 $$
+
 或 以$f_{normal\_x}$、$f_{normal\_y}$的方式表示为
+
 $$
 \begin{cases}
 u = f_{normal\_x} W_{image} \frac{X_c}{Z_c} + c_x \\[2ex]
@@ -157,28 +165,12 @@ f_x&0&c_x\\0&f_y&c_y\\0&0&1
 $$
 
 
-
-# 鱼眼模型 (fisheye)
-
-Given a point $ X=[x_c \quad  y_c \quad  z_c] $ in camera coordinates, the fisheye projection is:
-
-$$
-r = \sqrt{x_c^2 + y_c^2} \\
-\theta = atan2(r, |z|) \\
-\theta_d = \theta (1 + k1 * \theta^2 + k2 * \theta^4 + k3 * \theta^6 + k4 * \theta^8) \\
-x' = \frac{\theta_d * x_c} {r} \\
-y' = \frac{\theta_d * y_c} {r} \\
-u = f_x (x' + \alpha y') + c_x \\
-v = f_y y' + c_y
-$$
-
-* [Fisheye camera model](https://docs.opencv.org/master/db/d58/group__calib3d__fisheye.html)
-
-
 # 畸变模型
 
 ## 多项式畸变模型 (radial-tangential)
+
 透镜的畸变主要分为径向畸变和切向畸变。  
+
 **径向畸变** 是由于透镜形状的制造工艺导致，且越向透镜边缘移动径向畸变越严重，实际情况中我们常用r=0处的泰勒级数展开的前几项来近似描述径向畸变，矫正径向畸变前后的坐标关系为：
 
 $$
@@ -206,40 +198,40 @@ y_{distorted} =  y (1+k_1r^2+k_2r^4+k_3r^6) + 2p_2xy + p_1(r^2+2y^2)
 \end{cases}
 $$
 
-其中，$r^2 = x^2 + y^2$
+其中，$r^2 = x^2 + y^2$  
+
 综上，我们一共需要5个畸变参数 $(k_1, k_2, k_3, p_1, p_2)$ 来描述透镜畸变。
-
-## FOV畸变模型
-
-$$
-r_d = \frac{1}{\omega}arctan(2r_u tan(\frac{\omega}{2}))
-$$
-
-其中，${r_u}^2 = x^2 + y^2$，$\omega$为FOV畸变参数。   
-
-使用下式应用该畸变模型：
-
-$$
-\begin{cases}
-x_{distorted} = \frac{r_u}{r_d}x\\[2ex]
-y_{distorted} =  \frac{r_u}{r_d}y
-\end{cases}
-$$
-
-## Distortion Models in ROS
-* **plumb_bob**: a 5-parameter polynomial approximation of radial and tangential distortion
-* **rational_polynomial**: an 8-parameter rational polynomial distortion model
 
 ## 畸变矫正
 
 * [[图像]畸变校正详解](https://blog.csdn.net/humanking7/article/details/45037239)
+* 核心示例代码 (from [here](https://github.com/cggos/cgocv/blob/master/cv_core/include/cgocv/image.h#L153-L179))
 
-参考：[Straight lines have to be straight: automatic calibration and removal of distortion from scenes of structured enviroments](https://hal.archives-ouvertes.fr/inria-00267247/document)    
+  ```c++
+  for (int v = 0; v < height; v++) {
+    for (int u = 0; u < width; u++) {
 
-# 其他
+      double u_distorted = 0, v_distorted = 0;
 
-## ATAN model
+      double x = (u-cx)/fx;
+      double y = (v-cy)/fy;
 
-## OmniCam model
+      double x2 = x*x, y2 = y*y, xy = x*y, r2 = x2 + y2;
+      double x_radial = x * (1 + k1*r2 + k2*r2*r2);
+      double y_radial = y * (1 + k1*r2 + k2*r2*r2);
+      double x_tangential = 2*p1*xy + p2*(r2 + 2*x2);
+      double y_tangential = 2*p2*xy + p1*(r2 + 2*y2);
+      double xd = x_radial + x_tangential;
+      double yd = y_radial + y_tangential;
 
-## [Supported models in Kalibr](https://github.com/ethz-asl/kalibr/wiki/supported-models)
+      u_distorted = xd*fx + cx;
+      v_distorted = yd*fy + cy;
+
+      // 最近邻插值
+      if (u_distorted >= 0 && v_distorted >= 0 && u_distorted < width && v_distorted < height)
+          img_dst(v, u) = (*this)((int) v_distorted, (int) u_distorted);
+      else
+          img_dst(v, u) = 0;
+    }
+  }
+  ```
