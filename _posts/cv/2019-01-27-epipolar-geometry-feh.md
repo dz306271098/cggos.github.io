@@ -1,14 +1,14 @@
 ---
 layout: post
-title: "对极几何之FEH"
+title: "计算机视觉对极几何之FEH"
 date: 2019-01-27
 categories: ComputerVision
-tags: [Stereo Vision, 3D Reconstruction]
+tags: [Stereo Vision, 3D Reconstruction, Pose Estimation]
 ---
 
 [TOC]
 
-## Overview
+# Overview
 
 <div align=center>
   <img src="../images/epipolar_geometry/epipolar_geometry.jpg">
@@ -24,7 +24,7 @@ Basic Epipolar Geometry entities for **pinhole cameras** and **panoramic camera*
   <img src="../images/epipolar_geometry/epipolar_geometry_pinhole.jpg"> <img src="../images/epipolar_geometry/epipolar_geometry_panoramic.jpg">
 </div>
 
-## Foundamental Matrix (基本矩阵)
+# Foundamental Matrix (基本矩阵)
 
 $$
 \boldsymbol{F} = \boldsymbol{K}'^{-T} \boldsymbol{E} \boldsymbol{K}^{-1}
@@ -55,12 +55,12 @@ $\boldsymbol{F}$ 的计算：
 * Compute from 7 image point correspondences
 * 8点法（**Eight-Point Algorithm**）
 
-### Foundamental Matrix Estimation
+## Foundamental Matrix Estimation
 
 * 类似于下面 $\boldsymbol{E}$ 的估计
 
 
-## Essential Matrix (本质矩阵)
+# Essential Matrix (本质矩阵)
 
 * A 3×3 matrix is an essential matrix **if and only if two of its singular values are equal, and the third is zero**
 
@@ -94,7 +94,7 @@ $\boldsymbol{E}$ 的计算：
 * 5点法（最少5对点求解）
 * 8点法（**Eight-Point Algorithm**）
 
-### Essential Matrix Estimation
+## Essential Matrix Estimation
 
 矩阵形式：
 
@@ -188,7 +188,7 @@ $$
 \boldsymbol{U}_E \boldsymbol{D}_E' \boldsymbol{V}_E^T
 $$
 
-### Rotation and translation from E
+## Rotation and translation from E
 
 The four possible solutions for calibrated reconstruction from E  
 * Between the left and right sides there is a baseline reversal
@@ -234,6 +234,51 @@ $$
 \end{aligned}
 $$
 
+Rt恢复示例代码 [e2rt.cpp](https://github.com/cggos/cgocv/blob/master/epipolar_geometry/e2rt/e2rt.cpp)：
+
+```c++
+Matrix3d E;
+E << -0.0203618550523477,   -0.4007110038118445,  -0.03324074249824097,
+      0.3939270778216369,   -0.03506401846698079,  0.5857110303721015,
+     -0.006788487241438284, -0.5815434272915686,  -0.01438258684486258;
+
+cout << "E = \n" << E << endl;
+
+// SVD and fix sigular values
+JacobiSVD<MatrixXd> svd(E, ComputeThinU | ComputeThinV);
+Matrix3d m3U = svd.matrixU();
+Matrix3d m3V = svd.matrixV();
+Vector3d v3S = svd.singularValues();
+
+double temp = (v3S[0]+v3S[1])/2;
+Matrix3d m3S(Vector3d(temp, temp, 0).asDiagonal());
+
+Eigen::Matrix3d m3R_z_p = Eigen::AngleAxisd( M_PI/2, Eigen::Vector3d(0,0,1)).toRotationMatrix();
+Eigen::Matrix3d m3R_z_n = Eigen::AngleAxisd(-M_PI/2, Eigen::Vector3d(0,0,1)).toRotationMatrix();
+cout << "m3R_z_p = \n" << m3R_z_p << endl;
+cout << "m3R_z_n = \n" << m3R_z_n << endl;
+
+// set t1, t2, R1, R2
+Matrix3d t_wedge1;
+Matrix3d t_wedge2;
+t_wedge1 = m3U * m3R_z_p * m3S * m3U.transpose();
+t_wedge2 = m3U * m3R_z_n * m3S * m3U.transpose();
+
+Matrix3d R1;
+Matrix3d R2;
+R1 = m3U * m3R_z_p.transpose() * m3V.transpose();
+R2 = m3U * m3R_z_n.transpose() * m3V.transpose();
+
+cout << "R1 = \n" << R1 << endl;
+cout << "R2 = \n" << R2 << endl;
+cout << "t1 = \n" << Sophus::SO3::vee(t_wedge1) << endl;
+cout << "t2 = \n" << Sophus::SO3::vee(t_wedge2) << endl;
+
+// check t^R=E up to scale
+Matrix3d tR = t_wedge1 * R1;
+cout << "t^R = \n" << tR << endl;
+```
+
 **DecomposeE** in ORB-SLAM2  
 
 ```c++
@@ -261,9 +306,14 @@ void Initializer::DecomposeE(const cv::Mat &E, cv::Mat &R1, cv::Mat &R2, cv::Mat
 
 **[CheckRT](https://github.com/cggos/orbslam2_cg/blob/master/src/Initializer.cc)** in ORB-SLAM2
 
-## Homography Matrix (单应性矩阵)
+# Homography Matrix (单应性矩阵)
+
+<div align=center>
+  <img src="../images/epipolar_geometry/projective_8dof.png">
+</div>
 
 * For planar surfaces, 3D to 2D perspective projection reduces to a 2D to 2D transformation
+* [从零开始一起学习SLAM | 神奇的单应矩阵](https://zhuanlan.zhihu.com/p/49435367)
 
 **单应性矩阵** 通常描述处于 **共同平面** 上的一些点在 **两张图像之间的变换关系**。
 
@@ -273,7 +323,7 @@ $$
 
 其中，$p, p'$ 为两个匹配像素点的 **归一化平面坐标** （也可为其他点，只要 **共面且3点不共线** 即可）
 
-### Homography Estimation
+## Homography Estimation
 
 矩阵形式：
 
@@ -307,7 +357,7 @@ $$
 
 实际中，通过 **$h_{33}=1$** 或 **$\|\boldsymbol{H}\|_F=1$** 两种方法 使 $\boldsymbol{H}$ 具有 8自由度。
 
-#### cont 1: H元素h33=1
+### cont 1: H元素h33=1
 
 <div align=center>
   <img src="../images/epipolar_geometry/homography_cont_01.jpg">
@@ -333,7 +383,7 @@ $$
 (\boldsymbol{A}^T \boldsymbol{A})^{-1} \boldsymbol{A}^T \boldsymbol{b}
 $$
 
-#### cont 2: H的F范数|H|=1
+### cont 2: H的F范数|H|=1
 
 <div align=center>
   <img src="../images/epipolar_geometry/homography_cont_02.jpg">
@@ -372,11 +422,11 @@ $$
 
 
 
-### H in PTAM
+## H in PTAM
 
 * [相关代码](https://github.com/cggos/ptam_cg/blob/master/src/HomographyInit.cc)  
 
-#### 单应性矩阵的计算
+### 单应性矩阵的计算
 
 ```c++
 Matrix<3> HomographyInit::HomographyFromMatches(vector<HomographyMatch> vMatches)
@@ -432,24 +482,36 @@ Matrix<3> HomographyInit::HomographyFromMatches(vector<HomographyMatch> vMatches
 };
 ```
 
-#### Rotation and translation from H
+### Rotation and translation from H
 
 * *Motion and structure from motion in a piecewise planar environment*
 
-#### 手写笔记
+### 手写笔记
 
 <div align=center>
   <img src="../images/epipolar_geometry/homography_matrix_ptam_note.jpg">
 </div>
 
 
-## 总结
+# 2D-2D相机位姿估计
 
-当 特征点共面 或者 相机发生纯旋转 时，基础矩阵 $F$ 的自由度下降，就会出现所谓的 **退化(degenerate)**。  
+2D-2D相机位姿估计 通常利用 **对极几何** 进行计算，是单目SLAM初始化时的关键技术。
 
-为了能够避免退化现象的影响，通常会 **同时估计基础矩阵 $F$ 和 单应矩阵 $H$，选择重投影误差比较小的那个作为最终的运动估计矩阵**。
+<div align=center>
+  <img src="../images/epipolar_geometry/pose_estimation_2d_2d.png">
+</div>
 
-## Reference
+* 计算 **基础矩阵或本质矩阵** 适用于特征点不共面的情况，计算 **单应矩阵** 适用于特征点共面的情况
+
+* 当 特征点共面 或者 相机发生纯旋转 时，基础矩阵 $F$ 的自由度下降，就会出现所谓的 **退化(degenerate)**。为了能够避免退化现象的影响，通常会 **同时估计基础矩阵 $F$ 和 单应矩阵 $H$，选择重投影误差比较小的那个作为最终的运动估计矩阵**。
+
+* **平移向量t 的 尺度不确定性**
+* **初始化的纯旋转问题**：单目初始化不能只有旋转，必须要有一定程度的平移，否则由于t趋近于0，导致无从求解R或者误差非常大
+* 多于8对点：RANSAC
+
+Ref: [2D-2D相机位姿估计](https://www.jianshu.com/p/fbf56587a268)
+
+# Reference
 
 * Epipolar Geometry and the Fundamental Matrix in MVG (Chapter 9)
 * 《视觉SLAM十四讲》
