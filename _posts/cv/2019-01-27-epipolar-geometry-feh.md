@@ -511,6 +511,13 @@ Matrix<3> HomographyInit::HomographyFromMatches(vector<HomographyMatch> vMatches
 
 Ref: [2D-2D相机位姿估计](https://www.jianshu.com/p/fbf56587a268)
 
+## FEH in OpenCV
+
+* findFundamentalMat
+* findEssentialMat
+* findHomography
+* recoverPose
+
 # Reference
 
 * Epipolar Geometry and the Fundamental Matrix in MVG (Chapter 9)
