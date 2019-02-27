@@ -183,7 +183,8 @@ So if you've chosen **disptype = CV_16S** during computation, you can access a p
 
 $$
 \begin{aligned}
-	Z = depth = \frac{f' \cdot B}{disp(u,v)}
+	Z = depth = \frac{f' \cdot B}{d_p} \\
+  d_p = disp(u,v) + ({c_x}_2' - {c_x}_1')
 \end{aligned}
 $$
 
@@ -192,7 +193,7 @@ $$
 $$
 \begin{aligned}
 	\begin{cases}
-	Z = depth = \frac{f' \cdot B}{disp(u,v)} \\
+	Z = depth = \frac{f' \cdot B}{d_p} \\
 	X = \frac{u-c_x}{f‘’} \cdot Z \\
 	Y = \frac{v-c_y}{f’} \cdot Z
 	\end{cases}
@@ -200,7 +201,7 @@ $$
 \text{或}
 \begin{aligned}
 	\begin{cases}
-  bd = \frac{B}{disp(u,v)}\\
+  bd = \frac{B}{d_p}\\
 	Z = depth = f' \cdot bd \\
 	X = (u-c_x) \cdot bd \\
 	Y = (u-c_y) \cdot bd
