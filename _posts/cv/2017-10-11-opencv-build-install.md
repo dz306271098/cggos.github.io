@@ -39,6 +39,8 @@ cmake \
 	..
 ```
 
+or by the CMake curses interface `ccmake`
+
 ### Make & Install
 
 ```sh
