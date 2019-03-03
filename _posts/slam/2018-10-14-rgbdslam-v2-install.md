@@ -1,15 +1,25 @@
 ---
 layout: post
-title: "ROS kinetic下rgbdslam-v2的安装和使用"
+title: "Ubuntu 16.04 下 RGBDSLAM-v2 的安装和使用"
 date: 2018-10-14
 categories: SLAM
 tags: [SLAM, RGB-D Camera]
 ---
 
 # 简介
+
 [RGBD-SLAM-v2](http://felixendres.github.io/rgbdslam_v2/) is a state-of-the-art SLAM system for **RGB-D cameras**, e.g., the Microsoft Kinect. You can use it to create highly accurate **3D point clouds or OctoMaps**.
 
 RGBDSLAMv2 is based on the ROS project, OpenCV, PCL, OctoMap, SiftGPU and more.
+
+# rgbdslam_v2_cg
+
+**!!! Important**  
+
+本人已建立了 RGBDSLAM-v2 的改版 [cggos/rgbdslam_v2_cg](https://github.com/cggos/rgbdslam_v2_cg)，可直接跳转到该项目下，阅读 README.md 进行项目的安装，本文以下部分不必阅读。
+
+**!!! Important**  
+
 
 # 运行环境
 * 平台
