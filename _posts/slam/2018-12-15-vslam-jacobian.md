@@ -12,7 +12,9 @@ tags: [SLAM, Math]
 
 SLAM，即 **同时定位与建图**，视觉SLAM的 定位 即 求取相机位姿（旋转和平移 $[\mathbf{R} \quad \mathbf{t}]$）；在SLAM中，我们一般使用 **李代数 $\boldsymbol{\xi}$** 来表示 旋转和平移。  
 
-![epipolar_geometry.png](../images/stereo_vision/epipolar_geometry.png)
+<div align=center>
+  <image src="../images/stereo_vision/epipolar_geometry.png">
+</div>
 
 * 记 相机内参矩阵 $\mathbf{K}$，相机位姿 $\mathbf{T} = [\mathbf{R} \quad \mathbf{t}]$ (or $\boldsymbol{\xi}$)
 * 记 $I_1$ 的图像坐标系下，一像素点 $\mathbf{p}(u,v)$；在 $O_1$ 相机坐标系下，其对应的 三维点 $\mathbf{P}(X,Y,Z)$
@@ -56,7 +58,7 @@ r(\boldsymbol{\xi})
 \end{aligned}
 $$
 
-误差函数对于位姿扰动的 **雅可比矩阵(Jacobian Matrix)**，决定着下一步最优迭代估计时 位姿增量的方向。
+误差函数对于位姿的 **雅可比矩阵(Jacobian Matrix)**，决定着下一步最优迭代估计时 位姿增量的方向。
 
 $$
 \mathbf{J}(\boldsymbol{\xi}) =
@@ -223,61 +225,64 @@ $$
 \lim_{\Delta x \rightarrow 0} \frac{f(x+\Delta x) - f(x)}{\Delta x}
 $$
 
-利用 **扰动模型** $\Delta \boldsymbol{\xi} = [\Delta \boldsymbol{\rho} \quad \Delta \boldsymbol{\phi}]$，计算如下
+我们可以 根据李代数加法来对李代数进行求导，计算雅克比矩阵。   
+
+一般更使用的，利用李群来左乘或者右乘微小扰动，在对这个扰动的李代数进行求导，利用 **扰动模型** $\delta \boldsymbol{\xi} = [\delta \boldsymbol{\rho} \quad \delta \boldsymbol{\phi}]$，计算如下
 
 $$
 \begin{aligned}
 \frac{\partial \tilde{\mathbf{P'}}}{\partial \boldsymbol{\xi}}
 &= \frac{\partial (\mathbf{T} \cdot \tilde{\mathbf{P}})}{\partial \boldsymbol{\xi}} \\
 &=
-\frac{\partial ( exp(\boldsymbol{\xi}^{\wedge}) \tilde{\mathbf{P}} ) }{\partial \boldsymbol{\xi}} \\
+\frac{\partial ( exp(\boldsymbol{\xi}^{\wedge}) \tilde{\mathbf{P}} ) }{\partial \delta \boldsymbol{\xi}} \quad \text{(左扰动模型)} \\
 &=
-\lim_{\Delta \boldsymbol{\xi} \rightarrow 0}
+\lim_{\delta \boldsymbol{\xi} \rightarrow 0}
 \frac
 {
-exp(\boldsymbol{\xi}^{\wedge} + \Delta \boldsymbol{\xi}^{\wedge}) \tilde{\mathbf{P}} -
+exp(\delta \boldsymbol{\xi}^{\wedge}) exp(\boldsymbol{\xi}^{\wedge})
+\tilde{\mathbf{P}} -
 exp(\boldsymbol{\xi}^{\wedge}) \tilde{\mathbf{P}}
 }
-{ \Delta \boldsymbol{\xi} } \\
+{ \delta \boldsymbol{\xi} } \\
 &\approx
-\lim_{\Delta \boldsymbol{\xi} \rightarrow 0}
+\lim_{\delta \boldsymbol{\xi} \rightarrow 0}
 \frac
 {
-(\mathbf{I}+ \Delta \boldsymbol{\xi}^{\wedge}) exp(\boldsymbol{\xi}^{\wedge}) \tilde{\mathbf{P}} -
+(\mathbf{I}+ \delta \boldsymbol{\xi}^{\wedge}) exp(\boldsymbol{\xi}^{\wedge}) \tilde{\mathbf{P}} -
 exp(\boldsymbol{\xi}^{\wedge}) \tilde{\mathbf{P}}
 }
-{ \Delta \boldsymbol{\xi} } \\
+{ \delta \boldsymbol{\xi} } \\
 &=
-\lim_{\Delta \boldsymbol{\xi} \rightarrow 0}
+\lim_{\delta \boldsymbol{\xi} \rightarrow 0}
 \frac
 {
-  \Delta \boldsymbol{\xi}^{\wedge} exp(\boldsymbol{\xi}^{\wedge}) \tilde{\mathbf{P}}
+  \delta \boldsymbol{\xi}^{\wedge} exp(\boldsymbol{\xi}^{\wedge}) \tilde{\mathbf{P}}
 }
-{ \Delta \boldsymbol{\xi} } \\
+{ \delta \boldsymbol{\xi} } \\
 &=
-\lim_{\Delta \boldsymbol{\xi} \rightarrow 0}
+\lim_{\delta \boldsymbol{\xi} \rightarrow 0}
 \frac
 {
 \begin{bmatrix}
-\Delta \boldsymbol{\phi}^{\wedge} & \Delta \boldsymbol{\rho} \\
+\delta \boldsymbol{\phi}^{\wedge} & \delta \boldsymbol{\rho} \\
 \mathbf{0}^{T} & 0
 \end{bmatrix}
 \begin{bmatrix}
 \mathbf{R} \cdot \mathbf{P} + \mathbf{t} \\ 1
 \end{bmatrix}
 }
-{ \Delta \boldsymbol{\xi} } \\
+{ \delta \boldsymbol{\xi} } \\
 &=
-\lim_{\Delta \boldsymbol{\xi} \rightarrow 0}
+\lim_{\delta \boldsymbol{\xi} \rightarrow 0}
 \frac
 {
 \begin{bmatrix}
-\Delta \boldsymbol{\phi}^{\wedge} (\mathbf{R} \cdot \mathbf{P} +
-\mathbf{t}) + \Delta \boldsymbol{\rho} \\
+\delta \boldsymbol{\phi}^{\wedge} (\mathbf{R} \cdot \mathbf{P} +
+\mathbf{t}) + \delta \boldsymbol{\rho} \\
 0
 \end{bmatrix}
 }
-{ \Delta \boldsymbol{\xi} } \\
+{ \delta \boldsymbol{\xi} } \\
 &=
 \begin{bmatrix}
 \mathbf{I} & -(\mathbf{R} \cdot \mathbf{P} + \mathbf{t})^{\wedge} \\
@@ -304,6 +309,10 @@ $$
 
 注意：
 * 上面的 $\boldsymbol{\xi}$ 中 平移 $\boldsymbol{\rho}$ 在前， 旋转 $\boldsymbol{\phi}$ 在后；如果 旋转在前，平移在后，则 $\mathbf{J}_3$ 的前三列与后三列须对调。
+
+* [ch4 为什么能用左扰动模型来求导啊？](https://github.com/gaoxiang12/slambook/issues/183)[gaoxiang12/slambook Issues #183]
+  > 按照定义，左乘一个扰动，然后令扰动趋于零，求目标函数相对于扰动的变化率，作为导数来使用。同时，在优化过程中，用这种导数算出来的增量，以左乘形式更新在当前估计上，于是使估计值一直在SO(3)或SE(3)上。这种手段称为“流形上的优化”。  
+* [四元数矩阵与 so(3) 左右雅可比](https://fzheng.me/2018/05/22/quaternion-matrix-so3-jacobians/)
 
 # 总结
 
