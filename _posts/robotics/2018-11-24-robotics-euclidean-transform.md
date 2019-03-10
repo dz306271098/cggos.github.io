@@ -65,17 +65,17 @@ $$
 #### 旋转向量（轴角）
 
 $$
-\boldsymbol{\xi} = \alpha\mathbf{a} = log(\mathbf{R})^{\vee} \in \mathbb{R}^3
+\boldsymbol{\phi} = \alpha\mathbf{a} = log(\mathbf{R})^{\vee} \in \mathbb{R}^3
 $$
 
 * **旋转轴**：矩阵 $\mathbf{R}$ 特征值1对应的特征向量（单位矢量）
 $$
-\mathbf{a} = \frac{\boldsymbol{\xi}}{||\boldsymbol{\xi}||} \in \mathbb{R}^3
+\mathbf{a} = \frac{\boldsymbol{\phi}}{||\boldsymbol{\phi}||} \in \mathbb{R}^3
 $$
 
 * **旋转角**
 $$
-\alpha = ||\boldsymbol{\xi}|| = arccos(\frac{tr(\mathbf{R})-1}{2}) \in \mathbb{R}
+\alpha = ||\boldsymbol{\phi}|| = arccos(\frac{tr(\mathbf{R})-1}{2}) \in \mathbb{R}
 $$
 
 罗德里格斯公式（[Rodrigues' rotation formula](https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula)）：
@@ -115,6 +115,21 @@ and
 $$
 ||\mathbf{a}||_2 = 1, \quad
 \eta^2 + \varepsilon_1^2 + \varepsilon_2^2 + \varepsilon_3^2 = 1
+$$
+
+即
+
+$$
+\mathbf{q}
+= \begin{bmatrix} \mathbf{a} sin\frac{\alpha}{2} \\ cos\frac{\alpha}{2}\end{bmatrix}
+$$
+
+当 $\alpha$ 很小时，可以近似表达为
+
+$$
+\mathbf{q}
+\approx \begin{bmatrix} \mathbf{a} \frac{\alpha}{2} \\ 1 \end{bmatrix}
+= \begin{bmatrix} \frac{\boldsymbol{\phi}}{2} \\ 1 \end{bmatrix}
 $$
 
 四元数可以在 **保证效率** 的同时，减小矩阵1/4的内存占有量，同时又能 **避免欧拉角的万向锁问题**。
@@ -279,6 +294,8 @@ $$
 指数映射：$\mathbf{T} = exp(\boldsymbol{\xi}^{\wedge})$  
 对数映射：$\boldsymbol{\xi} = log(\mathbf{T})^{\vee}$
 
+* [第四讲：李群和李代数](https://zhuanlan.zhihu.com/p/33156814)
+* [四元数矩阵与 so(3) 左右雅可比](https://fzheng.me/2018/05/22/quaternion-matrix-so3-jacobians/)
 
 ## <a name="coordinate_handle_rules">坐标系手性</a>
 坐标系的手性主要分为 **右手系** 和 **左手系**，主要通过以下两种方法区分（右手系）：
