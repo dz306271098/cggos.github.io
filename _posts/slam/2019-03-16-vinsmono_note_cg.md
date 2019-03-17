@@ -62,10 +62,10 @@ $$
 \begin{bmatrix}
 1
 \\
-0.5w_{i}^{{}'}
+0.5w_{i}'
 \end{bmatrix} \\
-\delta\alpha_{i+1} &= \delta\alpha_{i}+\delta\beta_{i}t+0.5a_{i}^{{}'}\delta t^{2} \\
-\delta\beta_{i+1}&=\delta\beta_{i}+a_{i}^{{}'}\delta t \\
+\delta\alpha_{i+1} &= \delta\alpha_{i}+\delta\beta_{i}t+0.5a_{i}'\delta t^{2} \\
+\delta\beta_{i+1}&=\delta\beta_{i}+a_{i}' \delta t \\
 {b_a}_{i+1}&= {b_a}_i \\
 {b_g}_{i+1}&= {b_g}_i
 \end{aligned}
@@ -75,8 +75,8 @@ $$
 
 $$
 \begin{aligned}
-w_{i}^{{}'}&=\frac{w_{i+1}+w_{i}}{2}-b_{i} \\
-a_{i}^{{}'}&=\frac{
+w_{i}' &= \frac{w_{i+1}+w_{i}}{2}-b_{i} \\
+a_{i}' &= \frac{
   \delta q_{i}(a_{i}+n_{a0}-b_{a_{i}})+
   \delta q_{i+1}(a_{i+1}++n_{a1}-b_{a_{i}})}{2}
 \end{aligned}
@@ -319,7 +319,7 @@ $$
 w^{k}_{k+1}=
 \left\{\begin{matrix}
 1, & {\theta}^{k}_{k+1}<threshold  (\text{一般5°}) \\
-\frac{threshold}{{\theta}^{k}_{k+1}}, & otherwise
+\frac{threshold}{\theta^{k}_{k+1}}, & otherwise
 \end{matrix}\right.
 $$
 
