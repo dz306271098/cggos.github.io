@@ -18,10 +18,67 @@ tags: [SLAM]
 
 ### IMU 测量方程
 
+忽略地球旋转，IMU 测量方程为
+
 $$
 \begin{aligned}
 \hat{a}_t &= a_t + b_{a_t} + R_w^t g^w + n_a \\
 \hat{\omega} &= \omega_t + b_{\omega}^t + n_{\omega}
+\end{aligned}
+$$
+
+从世界坐标系转为本体坐标系
+
+<div align=center>
+  <img src="../images/vins_mono/formular_w_b.png">
+</div>
+
+则 IMU测量模型（**观测值**）为
+
+$$
+\begin{bmatrix}
+\hat{\alpha}^{b_{k}}_{b_{k+1}}\\
+\hat{\gamma}^{b_{k}}_{b_{k+1}}\\
+\hat{\beta }^{b_{k}}_{b_{k+1}}\\
+0\\
+0
+\end{bmatrix}
+=\begin{bmatrix}
+q^{b_{k}}_{w}(p^{w}_{b_{k+1}}-p_{b_{k}}^{w}+\frac{1}{2}g^{w}\triangle t^{2}-v_{b_{k}}^{w}\triangle t)\\
+p_{b_{k}}^{w^{-1}}\otimes q^{w}_{b_{k+1}}\\
+q^{b_{k}}_{w}(v^{w}_{b_{k+1}}+g^{w}\triangle t-v_{b_{k}}^{w})\\
+b_{ab_{k+1}}-b_{ab_{k}}\\
+b_{wb_{k+1}}-b_{wb_{k}}
+\end{bmatrix}
+$$
+
+### 预积分方程
+
+离散状态下采用 **中值法积分** 的预积分方程为
+
+$$
+\begin{aligned}
+\delta q_{i+1} &= \delta q_{i} \otimes
+\begin{bmatrix}
+1
+\\
+0.5w_{i}^{{}'}
+\end{bmatrix} \\
+\delta\alpha_{i+1} &= \delta\alpha_{i}+\delta\beta_{i}t+0.5a_{i}^{{}'}\delta t^{2} \\
+\delta\beta_{i+1}&=\delta\beta_{i}+a_{i}^{{}'}\delta t \\
+{b_a}_{i+1}&= {b_a}_i \\
+{b_g}_{i+1}&= {b_g}_i
+\end{aligned}
+$$
+
+其中
+
+$$
+\begin{aligned}
+w_{i}^{{}'}&=\frac{w_{i+1}+w_{i}}{2}-b_{i} \\
+a_{i}^{{}'}&=\frac{
+  \delta q_{i}(a_{i}+n_{a0}-b_{a_{i}})+
+  \delta q_{i+1}(a_{i+1}++n_{a1}-b_{a_{i}})}{2}
 \end{aligned}
 $$
 
@@ -39,7 +96,7 @@ $$
 根据参考文献[2]中 ***5.3.3 The error-state kinematics*** 小节公式  
 
 <div align=center>
-  <img src="../images/vins_mono/eskf_533.png">
+  <img src="../images/vins_mono/formular_eskf_533.png">
 </div>
 
 对于 **中值法积分** 下的误差状态方程为  
@@ -141,8 +198,8 @@ $$
 
 $$
 \begin{aligned}
-F' &= I + F \delta t \\
-V  &= G \delta t
+F' &= I + F \delta t & \in \mathbb{R}^{15 \times 15} \\
+V  &= G \delta t     & \in \mathbb{R}^{15 \times 18}
 \end{aligned}
 $$
 
@@ -152,7 +209,7 @@ $$
 \delta X_{k+1} = F' \delta X_k + V n
 $$
 
-最后得到系统的 **雅克比矩阵** $J_{k+1}$ 和 **协方差矩阵** $P_{k+1}$
+最后得到系统的 **雅克比矩阵** $J_{k+1}$ 和 **协方差矩阵** $P_{k+1}$，初始状态下的雅克比矩阵和协方差矩阵为 **单位阵** 和 **零矩阵**
 
 $$
 \begin{aligned}
@@ -165,16 +222,184 @@ P_{k+1} &= F' P_k F'^T + V Q V^T,
 \end{aligned}
 $$
 
-初始状态下的雅克比矩阵和协方差矩阵为 **单位阵** 和 **零矩阵**
+当bias估计轻微改变时，我们可以使用如下的一阶近似 **对中值积分得到的预积分项进行矫正**，而不重传播，从而得到 **预积分估计值**
+
+$$
+\begin{aligned}
+{\alpha}^{b_{k}}_{b_{k+1}} &\approx
+\hat{\alpha}^{b_{k}}_{b_{k+1}} +
+J^{\alpha}_{b_a} \delta {b_a}_k +
+J^{\alpha}_{b_g} \delta {b_g}_k \\
+{\beta}^{b_{k}}_{b_{k+1}} &\approx
+\hat{\beta}^{b_{k}}_{b_{k+1}} +
+J^{\beta}_{b_a} \delta {b_a}_k +
+J^{\beta}_{b_g} \delta {b_g}_k \\
+{\gamma}^{b_{k}}_{b_{k+1}} &\approx
+\hat{\gamma}^{b_{k}}_{b_{k+1}} \otimes
+\begin{bmatrix}
+1
+\\
+\frac{1}{2} J^{\gamma}_{b_g} \delta {b_g}_k
+\end{bmatrix}
+\end{aligned}
+$$
+
 
 # 2. 初始化(松耦合)
 
-## 相机与IMU之间的相对旋转
+在提取的图像的Features和做完IMU的预积分之后，进入了系统的初始化环节，那么系统为什么要进行初始化，主要的目的有以下两个：      
 
-## 相机初始化
+- 系统使用单目相机，如果没有一个良好的尺度估计，就无法对两个传感器做进一步的融合。这个时候需要恢复出尺度；
+- 要对IMU进行初始化，IMU会受到bias的影响，所以要得到IMU的bias。
 
-## 视觉与IMU对齐
+所以我们要从初始化中恢复出尺度、重力、速度以及IMU的bias，因为视觉(SFM)在初始化的过程中有着较好的表现，所以在初始化的过程中主要以SFM为主，然后将IMU的预积分结果与其对齐，即可得到较好的初始化结果。
 
+## 2.1 相机与IMU之间的相对旋转
+
+相机与IMU之间的旋转标定非常重要，**偏差1-2°系统的精度就会变的极低**。
+
+设相机利用对极关系得到的旋转矩阵为 $R^{c_{k}}_{c_{k+1}}$，IMU经过预积分得到的旋转矩阵为$R^{b_{k}}_{b_{k+1}}$，相机与IMU之间的相对旋转为 $R^{b}_{c}$，则对于任一帧满足，
+
+$$
+R^{b_{k}}_{b_{k+1}}R^{b}_{c}=R^{b}_{c}R^{c_{k}}_{c_{k+1}}
+$$
+
+将旋转矩阵写为四元数，则上式可以写为
+
+$$
+q^{b_{k}}_{b_{k+1}} \otimes q^{b}_{c}=q^{b}_{c}\otimes q^{c_{k}}_{c_{k+1}}
+$$
+
+将其写为左乘和右乘的形式
+
+$$
+({[q^{b_{k}}_{b_{k+1}}]}_L - {[q^{c_{k}}_{c_{k+1}}]}_R) q^b_c
+= Q^k_{k+1} q^b_c = 0
+$$
+
+$[q]_L$ 与 $[q]_R$ 分别表示 **四元数左乘矩阵** 和 **四元数右乘矩阵**，其定义为（四元数实部在后）
+
+$$
+\begin{aligned}
+[q]_L &=
+\begin{bmatrix}
+q_{w}I_{3}+[q_{xyz }]_{\times} & q_{xyz}\\
+-q_{xyz} & q_{w}
+\end{bmatrix} \\
+[q]_R &=
+\begin{bmatrix}
+q_{w}I_{3}-[q_{xyz }]_{\times} & q_{xyz}\\
+-q_{xyz} & q_{w}
+\end{bmatrix}
+\end{aligned}
+$$
+
+那么对于 $n$对测量值，则有
+
+$$
+\begin{bmatrix}
+w^{0}_{1}Q^{0}_{1}\\
+w^{1}_{2}Q^{1}_{2}\\
+\vdots \\
+w^{N-1}_{N}Q^{N-1}_{N}
+\end{bmatrix}q^{b}_{c}=Q_{N}q^{b}_{c}=0
+$$
+
+其中 $w^{N-1}_{N}$ 为外点剔除权重，其与相对旋转求得的角度残差有关，$N$为计算相对旋转需要的测量对数，其由最终的终止条件决定。角度残差可以写为，
+
+$$
+{\theta}^{k}_{k+1}=
+arccos\bigg(
+  \frac{tr(\hat{R}^{b^{-1}}_{c}R^{b_{k}^{-1}}_{b_{k+1}}\hat{R}^{b}_{c}R^{c_{k}}_{c_{k+1}} )-1}{2}\bigg)
+$$
+
+从而权重为
+
+$$
+w^{k}_{k+1}=
+\left\{\begin{matrix}
+1, & {\theta}^{k}_{k+1}<threshold  (\text{一般5°}) \\
+\frac{threshold}{{\theta}^{k}_{k+1}}, & otherwise
+\end{matrix}\right.
+$$
+
+至此，就可以通过求解方程 $Q_{N}q^{b}_{c}=0$ 得到相对旋转，解为 $Q_{N}$ 的左奇异向量中最小奇异值对应的特征向量。
+
+但是，在这里还要注意 __求解的终止条件(校准完成的终止条件)__ 。在足够多的旋转运动中，我们可以很好的估计出相对旋转 $R^{b}_{c}$，这时 $Q_{N}$ 对应一个准确解，且其零空间的秩为1。但是在校准的过程中，某些轴向上可能存在退化运动(如匀速运动)，这时 $Q_{N}$ 的零空间的秩会大于1。判断条件就是 $Q_{N}$ 的第二小的奇异值是否大于某个阈值，若大于则其零空间的秩为1，反之秩大于1，相对旋转$R^{b}_{c}$ 的精度不够，校准不成功。  
+
+## 2.2 相机初始化
+
+* 求取本质矩阵求解位姿
+* 三角化特征点
+* PnP求解位姿
+
+不断重复的过程，直到恢复出滑窗内的Features和相机位姿
+
+## 2.3 视觉与IMU对齐
+
+* Gyroscope Bias Calibration
+* Velocity, Gravity Vector and Metric Scale Initialization
+* Gravity Refinement
+* Completing Initialization
+
+### 陀螺仪Bias标定
+
+标定陀螺仪Bias使用如下代价函数
+
+$$
+\underset{\delta b_{w}}{min}\sum_{k\in B}^{ }\left \| q^{c_{0}^{-1}}_{b_{k+1}}\otimes q^{c_{0}}_{b_{k}}\otimes\gamma _{b_{k+1}}^{b_{k}} \right \|^{2}
+$$
+
+因为四元数最小值为单位四元数 $[1,0_{v}]^{T}$，所以令
+
+$$
+q^{c_{0}^{-1}}_{b_{k+1}}\otimes q^{c_{0}}_{b_{k}}\otimes\gamma _{b_{k+1}}^{b_{k}} =
+\begin{bmatrix}
+1\\
+0
+\end{bmatrix}
+$$
+
+其中
+
+$$
+\gamma _{b_{k+1}}^{b_{k}}\approx \hat{\gamma}_{b_{k+1}}^{b_{k}}\otimes \begin{bmatrix}
+1\\
+\frac{1}{2}J^{\gamma }_{b_{w}}\delta b_{w}
+\end{bmatrix}
+$$
+
+所以
+
+$$
+\hat{\gamma}_{b_{k+1}}^{b_{k}} \otimes
+\begin{bmatrix}
+1\\
+\frac{1}{2}J^{\gamma }_{b_{w}}\delta b_{w}
+\end{bmatrix}
+= q^{c_{0}^{-1}}_{b_{k}}\otimes q^{c_{0}}_{b_{k+1}}
+$$
+
+$$
+\begin{bmatrix}
+1\\
+\frac{1}{2}J^{\gamma }_{b_{w}}\delta b_{w}
+\end{bmatrix}=\hat{\gamma}_{b_{k+1}}^{b_{k}^{-1}}\otimes q^{c_{0}^{-1}}_{b_{k}}\otimes q^{c_{0}}_{b_{k+1}}
+$$
+
+
+只取上式虚部，再进行最小二乘求解
+
+$$
+J^{\gamma^{T}}_{b_{w}}J^{\gamma }_{b_{w}}\delta b_{w}=
+J^{\gamma^{T}}_{b_{w}}(\hat{\gamma}_{b_{k+1}}^{b_{k}^{-1}}\otimes q^{c_{0}^{-1}}_{b_{k}}\otimes q^{c_{0}}_{b_{k+1}})_{vec}
+$$
+
+求解上式的最小二乘解，即可得到 $\delta b_{w}$，注意这个地方得到的只是Bias的变化量，需要在滑窗内累加得到Bias的准确值。   
+
+### 初始化速度、重力向量和尺度因子
+
+### 优化重力
 
 # 3. 后端优化(紧耦合)
 
@@ -188,11 +413,175 @@ x^{b}_{c} &= [p^{b}_{c},q^{b}_{c}]
 \end{aligned}
 $$
 
-## IMU 测量残差
+优化过程中的 **误差状态量**
 
-## 视觉 测量残差
+$$
+\begin{aligned}
+\delta X&=[\delta x_{0},\delta x_{1},\cdots ,\delta x_{n},\delta x^{b}_{c},\lambda_{0},\delta \lambda _{1}, \cdots , \delta \lambda_{m}]  \\
+\delta x_{k}&=[\delta p^{w}_{b_{k}},\delta v^{w}_{b_{k}},\delta \theta ^{w}_{b_{k}},\delta b_{a},\delta b_{g}],\quad k\in[0,n] \\
+\delta x^{b}_{c}&= [\delta p^{b}_{c},\delta q^{b}_{c}]
+\end{aligned}
+$$
 
-## 边缘化
+进而得到系统优化的代价函数
+
+$$
+\underset{X}{min}
+\begin{Bmatrix}
+\left \|
+r_{p}-H_{p}X
+\right \|^{2} +
+\sum_{k\in B}^{ } \left \|
+r_{B}(\hat{z}^{b_{k}}_{b_{k+1}},X)
+\right \|^{2}_{P^{b_{k}}_{b{k+1}}} +
+\sum_{(i,j)\in C}^{ } \left \|
+r_{C}(\hat{z}^{c_{j}}_{l},X)
+\right \|^{2}_{P^{c_{j}}_{l}}
+\end{Bmatrix}
+\tag{4.2}
+$$
+
+其中三个残差项依次是
+
+* 边缘化的先验信息
+* IMU测量残差
+* 视觉的观测残差
+
+三种残差都是用 **马氏距离**（与量纲无关） 来表示的。
+
+## 3.1 IMU 测量残差
+
+上面的IMU预积分（测量值 - 估计值），得到IMU测量残差
+
+$$
+\begin{aligned}
+r_{B}(\hat{z}^{b_{k}}_{b_{k+1}},X)=
+\begin{bmatrix}
+\delta \alpha ^{b_{k}}_{b_{k+1}}\\
+\delta \theta   ^{b_{k}}_{b_{k+1}}\\
+\delta \beta ^{b_{k}}_{b_{k+1}}\\
+0\\
+0
+\end{bmatrix}
+&=\begin{bmatrix}
+q^{b_{k}}_{w}(p^{w}_{b_{k+1}}-p_{b_{k}}^{w}+\frac{1}{2}g^{w}\triangle t^{2}-v_{b_{k}}^{w}\triangle t)-\hat{\alpha }^{b_{k}}_{b_{k+1}}\\
+[q_{b_{k+1}}^{w^{-1}}\otimes q^{w}_{b_{k}}\otimes \hat{\gamma  }^{b_{k}}_{b_{k+1}}]_{xyz}\\
+q^{b_{k}}_{w}(v^{w}_{b_{k+1}}+g^{w}\triangle t-v_{b_{k}}^{w})-\hat{\beta }^{b_{k}}_{b_{k+1}}\\
+b_{ab_{k+1}}-b_{ab_{k}}\\
+b_{gb_{k+1}}-b_{gb_{k}}
+\end{bmatrix}
+\end{aligned}
+$$
+
+其中 $[\hat{\alpha }^{b_{k}}_{b_{k+1}},\hat{\gamma  }^{b_{k}}_{b_{k+1}},\hat{\beta }^{b_{k}}_{b_{k+1}}]$ 来自于 **IMU矫正预积分** 部分。
+
+高斯迭代优化过程中会用到IMU测量残差对状态量的雅克比矩阵，但此处我们是 **对误差状态量求偏导**，下面对四部分误差状态量求取雅克比矩阵。
+
+对$[\delta p^{w}_{b_{k}},\delta \theta ^{w}_{b_{k}}]$ 求偏导得
+
+$$
+J[0]=\begin{bmatrix}
+-q^{b_{k}}_{w} & R^{b_{k}}_{w}[(p^{w}_{b_{k+1}}-p_{b_{k}}^{w}+\frac{1}{2}g^{w}\triangle t^{2}-v_{b_{k}}^{w}\triangle t)]_{\times }\\
+0 & [q_{b_{k+1}}^{w^{-1}}q^{w}_{b_{k}}]_{L}[\hat{\gamma  }^{b_{k}}_{b_{k+1}}]_{R}J^{\gamma}_{b_{w}}\\
+0 & R^{b_{k}}_{w}[(v^{w}_{b_{k+1}}+g^{w}\triangle t-v_{b_{k}}^{w})]_{\times } \\
+0 & 0
+\end{bmatrix}
+\in \mathbb{R}^{15 \times 7}
+$$
+
+对 $[\delta v^{w}_{b_{k}},\delta b_{ab_{k}},\delta b_{wb_{k}}]$ 求偏导得
+
+$$J[1]=
+\begin{bmatrix}
+-q^{b_{k}}_{w}\triangle t & -J^{\alpha }_{b_{a}} & -J^{\alpha }_{b_{a}}\\
+0 & 0 & -[q_{b_{k+1}}^{w^{-1}}\otimes q^{w}_{b_{k}}\otimes \hat{\gamma  }^{b_{k}}_{b_{k+1}}]_{L}J^{\gamma}_{b_{w}}\\
+-q^{b_{k}}_{w} & -J^{\beta }_{b_{a}} & -J^{\beta }_{b_{a}}\\
+0& -I &0 \\
+0 &0  &-I
+\end{bmatrix}
+\in \mathbb{R}^{15 \times 9}
+$$
+
+对 $[\delta p^{w}_{b_{k+1}},\delta \theta ^{w}_{b_{k+1}}]$ 求偏导得
+
+$$
+J[2]=
+\begin{bmatrix}
+-q^{b_{k}}_{w} &0\\
+0 &  [\hat{\gamma  }^{b_{k}^{-1}}_{b_{k+1}}\otimes q_{w}^{b_{k}}\otimes q_{b_{k+1}}^{w}]_{L} \\
+0 & 0 \\
+0 & 0  \\
+0 & 0   
+\end{bmatrix}
+\in \mathbb{R}^{15 \times 7}
+$$
+
+对 $[\delta v^{w}_{b_{k}},\delta b_{ab_{k}},\delta b_{wb_{k}}]$ 求偏导得
+
+$$J[3]=
+\begin{bmatrix}
+-q^{b_{k}}_{w} &0 & 0\\
+0 & 0 &0 \\
+q^{b_{k}}_{w} & 0 & 0\\
+ 0& I &0 \\
+0 &0  &I
+\end{bmatrix}
+\in \mathbb{R}^{15 \times 9}
+$$
+
+
+## 3.2 视觉 测量残差
+
+视觉测量残差 即 **特征点的重投影误差**
+
+$$
+r_{C}=(\hat{z}_{l}^{c_{j}},X)=[b_{1},b_{2}]^{T}\cdot (\bar{P}_{l}^{c_{j}}-\frac{P_{l}^{c_{j}}}{\left \| P_{l}^{c_{j}} \right \|})
+$$
+
+其中，
+
+$$
+P_{l}^{c_{j}}=q_{b}^{c}(q_{w}^{b_{j}}(q_{b_{i}}^{w}(q_{c}^{b} \frac{\bar{P}_{l}^{c_{i}}}{\lambda _{l}}+p_{c}^{b})+p_{b_{i}}^{w}-p_{b_{j}}^{w})-p_{c}^{b})
+$$
+
+下面关于误差状态量对相机测量残差求偏导，得到高斯迭代优化过程中的雅克比矩阵。
+
+对 $[\delta p^{w}_{b_{i}},\delta \theta ^{w}_{b_{i}}]$ 求偏导
+
+$$
+J[0]=\begin{bmatrix}
+q_{b}^{c}q_{w}^{b_{j}} & -q_{b}^{c}q_{w}^{b_{j}}q_{b_{i}}^{w}[q_{c}^{b} \frac{\bar{P}_{l}^{c_{i}}}{\lambda_{l}}+p_{c}^{b}]_{\times }
+\end{bmatrix}
+\in \mathbb{R}^{3 \times 6}
+$$
+
+对 $[\delta p^{w}_{b_{j}},\delta \theta ^{w}_{b_{j}}]$ 求偏导
+
+$$
+J[1]=\begin{bmatrix}
+-q_{b}^{c}q_{w}^{b_{j}} & q_{b}^{c}q_{w}^{b_{j}}[q_{b_{i}}^{w}(q_{c}^{b} \frac{\bar{P}_{l}^{c_{i}}}{\lambda _{l}}+p_{c}^{b})+p_{b_{i}}^{w}-p_{b_{j}}^{w}]_{\times }
+\end{bmatrix}
+\in \mathbb{R}^{3 \times 6}
+$$
+
+对 $[\delta p^{b}_{c},\delta \theta ^{b}_{c}]$ 求偏导
+
+$$
+J[2]=
+\begin{bmatrix}
+q_{b}^{c}(q_{w}^{b_{j}}q_{bi}^{w}-I_{3*3}) & -q_{b}^{c}q_{w}^{b_{j}}q_{b_{i}}^{w}q_{c}^{b}[\frac{\bar{P}_{l}^{c_{i}}}{\lambda_{l}}]_{\times }+[q_{b}^{c}(q_{w}^{b_{j}}(q_{b_{i}}^{w}p_{c}^{b}+p_{b_{i}}^{w}-p_{b_{j}}^{w})-p_{c}^{b})]
+\end{bmatrix}
+\in \mathbb{R}^{3 \times 6}
+$$
+
+对 $\delta \lambda_{l}$ 求偏导
+
+$$
+J[3]=-q_{b}^{c}q_{w}^{b_{j}}q_{b_{i}}^{w}q_{c}^{b} \frac{\bar{P}_{l}^{c_{i}}}{\lambda_{l}^{2}}
+\in \mathbb{R}^{3 \times 1}
+$$
+
+## 3.3 边缘化
 
 
 # 4. 重定位
