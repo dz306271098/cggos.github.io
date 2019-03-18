@@ -399,7 +399,130 @@ $$
 
 ### 初始化速度、重力向量和尺度因子
 
+要估计的状态量
+
+$$
+X_{I}=
+[v^{b_{0}}_{b_{0}}, v^{b_{0}}_{b_{1}}, \cdots, v^{b_{n}}_{b_{n}}, g^{c_{0}}, s]
+\in \mathbb{R}^{3(n+1)+3+1}
+$$
+
+其中，$g^{c_{0}}$ 为在第 0 帧 Camera 相机坐标系下的重力向量。
+
+根据IMU测量模型可知
+
+$$
+\begin{aligned}
+\alpha^{b_{k}}_{b_{k+1}} &= R^{b_{k}}_{c_{0}}(s(\bar{p}^{c_{0}}_{b_{k+1}}-\bar{p}^{c_{0}}_{b_{k}}) +
+\frac{1}{2}g^{c_{0}}\Delta t_{k}^{2} -
+R^{c_0}_{b_k} v^{b_k}_{b_{k}} \Delta t_{k}) \\
+\beta ^{b_{k}}_{b_{k+1}} &=
+R^{b_{k}}_{c_{0}}(R^{c_0}_{b_{k+1}} v^{b_{k+1}}_{b_{k+1}} +
+g^{c_{0}}\Delta t_{k} -
+R^{c_0}_{b_k} v^{b_k}_{b_{k}})
+\end{aligned}
+$$
+
+我们已经得到了IMU相对于相机的旋转 $q_{b}^{c}$，假设IMU到相机的平移量$p_{b}^{c}$，那么可以很容易地将相机坐标系下的位姿转换到IMU坐标系下
+
+$$
+\begin{aligned}
+q_{b_{k}}^{c_{0}} &=
+q^{c_{0}}_{c_{k}}\otimes (q_{c}^{b})^{-1}  \\
+s\bar{p}^{c_{0}}_{b_{k}} &=
+s\bar{p}^{c_{0}}_{c_{k}} - R^{c_{0}}_{b_{k}}p_{c}^{b}
+\end{aligned}
+$$
+
+所以，定义相邻两帧之间的IMU预积分出的增量 （$\hat{\alpha}^{b_{k}}_{b_{k+1}}$，$\hat{\beta}^{b_{k}}_{b_{k+1}}$）与预测值之间的残差，即
+
+$$
+\begin{aligned}
+r(\hat{z}^{b_{k}}_{b_{k+1}}, X_I) &=
+\begin{bmatrix}
+\delta \alpha^{b_{k}}_{b_{k+1}} \\
+\delta \beta ^{b_{k}}_{b_{k+1}}
+\end{bmatrix} \\ &=
+\begin{bmatrix}
+\hat{\alpha}^{b_{k}}_{b_{k+1}} -& R^{b_{k}}_{c_{0}}(s(\bar{p}^{c_{0}}_{b_{k+1}}-\bar{p}^{c_{0}}_{b_{k}}) +
+\frac{1}{2}g^{c_{0}}\Delta t_{k}^{2} -
+R^{c_0}_{b_k} v^{b_k}_{b_{k}} \Delta t_{k})\\
+\hat{\beta}^{b_{k}}_{b_{k+1}} -&
+R^{b_{k}}_{c_{0}}(R^{c_0}_{b_{k+1}} v^{b_{k+1}}_{b_{k+1}} +
+g^{c_{0}}\Delta t_{k} -
+R^{c_0}_{b_k} v^{b_k}_{b_{k}})
+\end{bmatrix}
+\end{aligned}
+$$
+
+令 $r(\hat{z}^{b_{k}}_{b_{k+1}}, X_I) = \mathbf{0}$，转换成 $Hx=b$ 的形式
+
+$$
+\begin{bmatrix}
+-I\Delta t_{k} & 0 & \frac{1}{2}R^{b_{k}}_{c_{0}} \Delta t_{k}^{2} &
+R^{b_{k}}_{c_{0}}(\bar{p}^{c_{0}}_{c_{k+1}}-\bar{p}^{c_{0}}_{c_{k}}) \\
+-I & R^{b_{k}}_{c_{0}} R^{c_0}_{b_{k+1}} & R^{b_{k}}_{c_{0}}\Delta t_{k} & 0
+\end{bmatrix}
+\begin{bmatrix}
+v^{b_{k}}_{b_{k}}\\
+v^{b_{k+1}}_{b_{k+1}}\\
+g^{c_{0}}\\
+s
+\end{bmatrix} =
+\begin{bmatrix}
+\alpha^{b_{k}}_{b_{k+1}} - p_c^b + R^{b_{k}}_{c_{0}} R^{c_0}_{b_{k+1}} p_c^b \\
+\beta ^{b_{k}}_{b_{k+1}}
+\end{bmatrix}
+$$
+
+通过Cholosky分解求解 $X_I$
+
+$$
+H^T H X_I = H^T b
+$$
+
 ### 优化重力
+
+<div align=center>
+  <img src="../images/vins_mono/gravity_tangent_space.png">
+</div>
+
+重力矢量的模长固定（9.8），其为2个自由度，在切空间上对其参数化
+
+$$
+\begin{aligned}
+\hat{g} &=
+\|g\| \cdot \bar{\hat{g}} + \omega_1 \vec{b_1} + \omega_2 \vec{b_2} \\ &=
+\|g\| \cdot \bar{\hat{g}} + B \vec{\omega}
+\end{aligned} , \quad
+B \in \mathbb{R}^{3 \times 2}, \vec{\omega} \in \mathbb{R}^{2 \times 1}
+$$
+
+令 $\hat{g} = g^{c_{0}}$，将其代入上一小节公式得
+
+$$
+\begin{bmatrix}
+-I\Delta t_{k} & 0 & \frac{1}{2}R^{b_{k}}_{c_{0}} \Delta t_{k}^{2} B &
+R^{b_{k}}_{c_{0}}(\bar{p}^{c_{0}}_{c_{k+1}}-\bar{p}^{c_{0}}_{c_{k}}) \\
+-I & R^{b_{k}}_{c_{0}} R^{c_0}_{b_{k+1}} & R^{b_{k}}_{c_{0}}\Delta t_{k} B & 0
+\end{bmatrix}
+\begin{bmatrix}
+v^{b_{k}}_{b_{k}}\\
+v^{b_{k+1}}_{b_{k+1}}\\
+\vec{\omega}\\
+s
+\end{bmatrix} \\ =
+\begin{bmatrix}
+\alpha^{b_{k}}_{b_{k+1}} - p_c^b + R^{b_{k}}_{c_{0}} R^{c_0}_{b_{k+1}} p_c^b -
+\frac{1}{2}R^{b_{k}}_{c_{0}} \Delta t_{k}^{2} \|g\| \cdot \bar{\hat{g}}\\
+\beta ^{b_{k}}_{b_{k+1}} -
+R^{b_{k}}_{c_{0}}\Delta t_{k} \|g\| \cdot \bar{\hat{g}}
+\end{bmatrix}
+$$
+
+同样，通过Cholosky分解求得 $g^{c_{0}}$，即相机 $C_0$ 系下的重力向量。
+
+最后，通过将 $g^{c_{0}}$ 旋转至惯性坐标系中的 z 轴方向，可以计算相机系到惯性系的旋转矩阵 $q_{c_0}^w$，这样就可以将所有变量调整至惯性世界系中。
 
 # 3. 后端优化(紧耦合)
 
@@ -532,6 +655,10 @@ $$
 
 ## 3.2 视觉 测量残差
 
+<div align=center>
+  <img src="../images/vins_mono/visual_residual_sphere.png">
+</div>
+
 视觉测量残差 即 **特征点的重投影误差**
 
 $$
@@ -591,5 +718,6 @@ $$
 
 
 # 参考文献
-[1] VINS-Mono: A Robust and Versatile Monocular Visual-Inertial State Estimator
-[2] Quaternion kinematics for the error-state Kalman filter
+
+* [1] VINS-Mono: A Robust and Versatile Monocular Visual-Inertial State Estimator  
+* [2] Quaternion kinematics for the error-state Kalman filter
