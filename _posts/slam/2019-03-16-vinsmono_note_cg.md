@@ -10,11 +10,26 @@ tags: [SLAM]
 
 # 概述
 
+<div align=center>
+  <img src="../images/vins_mono/vins_mono_framework.png">
+</div>
+
 # 1. 测量预处理
 
 ## 1.1 视觉处理前端
 
+* 自适应直方图均衡化（ `cv::CLAHE` ）
+* 掩模处理，特征点均匀分布（`setMask`）
+* 提取图像Harris角点（`cv::goodFeaturesToTrack`）
+* 金字塔光流跟踪（`cv::calcOpticalFlowPyrLK`）
+* 本质矩阵(RANSAC)去除异常点（`rejectWithF`）
+* 发布feature_points(id_of_point, un_pts, cur_pts, pts_velocity)
+
 ## 1.2 IMU 预积分
+
+<div align=center>
+  <img src="../images/vins_mono/imu_integration.png">
+</div>
 
 ### IMU 测量方程
 
@@ -44,9 +59,9 @@ $$
 0
 \end{bmatrix}
 =\begin{bmatrix}
-q^{b_{k}}_{w}(p^{w}_{b_{k+1}}-p_{b_{k}}^{w}+\frac{1}{2}g^{w}\triangle t^{2}-v_{b_{k}}^{w}\triangle t)\\
+R^{b_{k}}_{w}(p^{w}_{b_{k+1}}-p_{b_{k}}^{w}+\frac{1}{2}g^{w}\triangle t^{2}-v_{b_{k}}^{w}\triangle t)\\
 p_{b_{k}}^{w^{-1}}\otimes q^{w}_{b_{k+1}}\\
-q^{b_{k}}_{w}(v^{w}_{b_{k+1}}+g^{w}\triangle t-v_{b_{k}}^{w})\\
+R^{b_{k}}_{w}(v^{w}_{b_{k+1}}+g^{w}\triangle t-v_{b_{k}}^{w})\\
 b_{ab_{k+1}}-b_{ab_{k}}\\
 b_{wb_{k+1}}-b_{wb_{k}}
 \end{bmatrix}
@@ -342,6 +357,10 @@ $$
 * Gravity Refinement
 * Completing Initialization
 
+<div align=center>
+  <img src="../images/vins_mono/visual_inertial_alignment.png">
+</div>
+
 ### 陀螺仪Bias标定
 
 标定陀螺仪Bias使用如下代价函数
@@ -525,6 +544,10 @@ $$
 最后，通过将 $g^{c_{0}}$ 旋转至惯性坐标系中的 z 轴方向，可以计算相机系到惯性系的旋转矩阵 $q_{c_0}^w$，这样就可以将所有变量调整至惯性世界系中。
 
 # 3. 后端优化(紧耦合)
+
+<div align=center>
+  <img src="../images/vins_mono/sliding_window_vio.png">
+</div>
 
 **滑动窗口** 中的 **全状态量**
 
@@ -721,3 +744,4 @@ $$
 
 * [1] VINS-Mono: A Robust and Versatile Monocular Visual-Inertial State Estimator  
 * [2] Quaternion kinematics for the error-state Kalman filter
+* [3] Xiaobuyi, [VINS-Mono代码分析总结](https://www.zybuluo.com/Xiaobuyi/note/866099)
