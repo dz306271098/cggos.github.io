@@ -44,13 +44,23 @@ $$
 \end{aligned}
 $$
 
-从世界坐标系转为本体坐标系
+### 预积分方程
+
+#### IMU估计值
+
+由上面的IMU测量方程积分就可以计算出下一时刻的p、v和q：  
+
+<div align=center>
+  <img src="../images/vins_mono/imu_integration_world.png">
+</div>
+
+为避免重新传播IMU观测值，选用IMU预积分模型，从世界坐标系转为本体坐标系
 
 <div align=center>
   <img src="../images/vins_mono/formular_w_b.png">
 </div>
 
-则 IMU测量模型（**观测值**）为
+则 IMU测量模型（**估计值**）为
 
 $$
 \begin{bmatrix}
@@ -70,9 +80,9 @@ b_{wb_{k+1}}-b_{wb_{k}}
 \end{bmatrix}
 $$
 
-### 预积分方程
+#### IMU测量值
 
-离散状态下采用 **中值法积分** 的预积分方程为
+离散状态下采用 **中值法积分** 的预积分方程（预积分测量值）为
 
 $$
 \begin{aligned}
@@ -260,24 +270,24 @@ P_{k+1} &= F' P_k F'^T + V Q V^T,
 \end{aligned}
 $$
 
-当bias估计轻微改变时，我们可以使用如下的一阶近似 **对中值积分得到的预积分项进行矫正**，而不重传播，从而得到 **预积分估计值**
+当bias估计轻微改变时，我们可以使用如下的一阶近似 **对中值积分得到的预积分测量值进行矫正**，而不重传播，从而得到 **更加精确的预积分测量值**
 
 $$
 \begin{aligned}
 {\alpha}^{b_{k}}_{b_{k+1}} &\approx
 \hat{\alpha}^{b_{k}}_{b_{k+1}} +
 J^{\alpha}_{b_a} \delta {b_a}_k +
-J^{\alpha}_{b_g} \delta {b_g}_k \\
+J^{\alpha}_{b_{\omega}} \delta {b_{\omega}}_k \\
 {\beta}^{b_{k}}_{b_{k+1}} &\approx
 \hat{\beta}^{b_{k}}_{b_{k+1}} +
 J^{\beta}_{b_a} \delta {b_a}_k +
-J^{\beta}_{b_g} \delta {b_g}_k \\
+J^{\beta}_{b_{\omega}} \delta {b_{\omega}}_k \\
 {\gamma}^{b_{k}}_{b_{k+1}} &\approx
 \hat{\gamma}^{b_{k}}_{b_{k+1}} \otimes
 \begin{bmatrix}
 1
 \\
-\frac{1}{2} J^{\gamma}_{b_g} \delta {b_g}_k
+\frac{1}{2} J^{\gamma}_{b_{\omega}} \delta {b_{\omega}}_k
 \end{bmatrix}
 \end{aligned}
 $$
@@ -671,7 +681,7 @@ $$
 
 同样，通过Cholosky分解求得 $g^{c_{0}}$，即相机 $C_0$ 系下的重力向量。
 
-最后，通过将 $g^{c_{0}}$ 旋转至惯性坐标系中的 z 轴方向，可以计算相机系到惯性系的旋转矩阵 $q_{c_0}^w$，这样就可以将所有变量调整至惯性世界系中。
+最后，通过将 $g^{c_{0}}$ 旋转至惯性坐标系（世界系）中的 z 轴方向[0,0,1]，可以计算第一帧相机系到惯性系的旋转矩阵 $q_{c_0}^w$，这样就可以将所有变量调整至惯性世界系中。
 
 对应代码：`RefineGravity`
 
@@ -681,7 +691,9 @@ $$
   <img src="../images/vins_mono/sliding_window_vio.png">
 </div>
 
-**滑动窗口** 中的 **全状态量**
+VIO 紧耦合方案的主要思路就是通过将基于视觉构造的残差项和基于IMU构造的残差项放在一起构造成一个联合优化的问题，整个优化问题的最优解即可认为是比较准确的状态估计。
+
+为了限制优化变量的数目，VINS-Mono 采用了滑动窗口的形式，**滑动窗口** 中的 **全状态量**：
 
 $$
 \begin{aligned}
@@ -733,7 +745,7 @@ $$
 
 ## 3.1 IMU 测量残差
 
-上面的IMU预积分（测量值 - 估计值），得到IMU测量残差
+上面的IMU预积分（估计值 - 测量值），得到IMU测量残差
 
 $$
 \begin{aligned}
@@ -755,7 +767,7 @@ b_{gb_{k+1}}-b_{gb_{k}}
 \end{aligned}
 $$
 
-其中 $[\hat{\alpha }^{b_{k}}_{b_{k+1}},\hat{\gamma  }^{b_{k}}_{b_{k+1}},\hat{\beta }^{b_{k}}_{b_{k+1}}]$ 来自于 **IMU矫正预积分** 部分。
+其中 $[\hat{\alpha }^{b_{k}}_{b_{k+1}},\hat{\gamma  }^{b_{k}}_{b_{k+1}},\hat{\beta }^{b_{k}}_{b_{k+1}}]$ 为 **IMU预积分修正值**。
 
 ```c++
 /**
@@ -890,6 +902,15 @@ $$
 P_{l}^{c_{j}}=q_{b}^{c}(q_{w}^{b_{j}}(q_{b_{i}}^{w}(q_{c}^{b} \frac{\bar{P}_{l}^{c_{i}}}{\lambda _{l}}+p_{c}^{b})+p_{b_{i}}^{w}-p_{b_{j}}^{w})-p_{c}^{b})
 $$
 
+```c++
+// 将第i frame下的3D点转到第j frame坐标系下
+Eigen::Vector3d pts_camera_i = pts_i / inv_dep_i;                 // pt in ith camera frame, 归一化平面
+Eigen::Vector3d pts_imu_i    = qic * pts_camera_i + tic;          // pt in ith body frame
+Eigen::Vector3d pts_w        = Qi * pts_imu_i + Pi;               // pt in world frame
+Eigen::Vector3d pts_imu_j    = Qj.inverse() * (pts_w - Pj);       // pt in jth body frame
+Eigen::Vector3d pts_camera_j = qic.inverse() * (pts_imu_j - tic); // pt in jth camera frame
+```
+
 下面关于误差状态量对相机测量残差求偏导，得到高斯迭代优化过程中的雅克比矩阵。
 
 对 $[\delta p^{w}_{b_{i}},\delta \theta ^{w}_{b_{i}}]$ 求偏导
@@ -929,13 +950,63 @@ $$
 
 视觉残差和雅克比矩阵计算的对应代码在 `ProjectionFactor::Evaluate` 函数中。
 
-## 3.3 边缘化
+## 3.3 边缘化(Marginalization)
 
+> SLAM is tracking a noraml distribution through a large state space
+
+<div align=center>
+  <img src="../images/vins_mono/marginalization.png">
+</div>
+
+**滑窗（Sliding Window）** 限制了关键帧的数量，防止pose和feature的个数不会随时间不断增加，使得优化问题始终在一个有限的复杂度内，不会随时间不断增长。
+
+### Marginalization
+
+然而，将pose移出windows时，有些约束会被丢弃掉，这样势必会导致求解的精度下降，而且当MAV进行一些退化运动(如: 匀速运动)时，没有历史信息做约束的话是无法求解的。所以，在移出位姿或特征的时候，需要将相关联的约束转变成一个约束项作为prior放到优化问题中，这就是marginalization要做的事情。
+
+边缘化的过程就是将滑窗内的某些较旧或者不满足要求的视觉帧剔除的过程，所以边缘化也被描述为 **将联合概率分布分解为边缘概率分布和条件概率分布的过程**(就是利用shur补减少优化参数的过程)。
+
+直接进行边缘化而不加入先验条件的后果：
+
+* 无故地移除这些pose和feature会丢弃帧间约束，会降低了优化器的精度，所以在移除pose和feature的时候需要将相关联的约束转变为一个先验的约束条件作为prior放到优化问题中
+
+* 在边缘化的过程中，不加先验的边缘化会导致系统尺度的缺失(参考[6])，尤其是系统在进行退化运动时(如无人机的悬停和恒速运动)。一般来说 **只有两个轴向的加速度不为0的时候，才能保证尺度可观**，而退化运动对于无人机或者机器人来说是不可避免的。所以在系统处于退化运动的时候，要加入先验信息保证尺度的可观性
+
+VINS-Mono中为了处理一些悬停的case，引入了一个two-way marginalization：
+
+* **MARGIN_OLD**：如果次新帧是关键帧，则丢弃滑动窗口内最老的图像帧，同时对与该图像帧关联的约束项进行边缘化处理。这里需要注意的是，如果该关键帧是观察到某个地图点的第一帧，则需要把该地图点的深度转移到后面的图像帧中去。
+
+* **MARGIN_NEW**：如果次新帧不是关键帧，则丢弃当前帧的前一帧。因为判定当前帧不是关键帧的条件就是当前帧与前一帧视差很小，也就是说当前帧和前一帧很相似，这种情况下直接丢弃前一帧，然后用当前帧代替前一帧。为什么这里可以不对前一帧进行边缘化，而是直接丢弃，原因就是当前帧和前一帧很相似，因此当前帧与地图点之间的约束和前一帧与地图点之间的约束是很接近的，直接丢弃并不会造成整个约束关系丢失信息。这里需要注意的是，要把当前帧和前一帧之间的 IMU 预积分转换为当前帧和前二帧之间的 IMU 预积分。
+
+在悬停等运动较小的情况下，会频繁的MARGIN_NEW，这样也就保留了那些比较旧但是视差比较大的pose。这种情况如果一直MARGIN_OLD的话，视觉约束不够强，状态估计会受IMU积分误差影响，具有较大的累积误差。
+
+### Schur Complement
+
+### First Estimate Jacobin
 
 # 4. 重定位
 
+<div align=center>
+  <img src="../images/vins_mono/relocalization.png">
+</div>
+
+## 4.1 闭环检测
+
+Vins-Mono还是利用词袋的形式来做Keyframe Database的构建和查询。在建立闭环检测的数据库时，关键帧的Features包括两部分：VIO部分的200个强角点和500 Fast角点，然后描述子仍然使用BRIEF(因为旋转可观，匹配过程中对旋转有一定的适应性，所以不用使用ORB)。
+
+## 4.2 闭环校正
+
+在闭环检测成功之后，会得到回环候选帧。所以要在已知位姿的回环候选帧和滑窗内的匹配帧做匹配，然后把回环帧加入到滑窗的优化当中，这时整个滑窗的状态量的维度是不发生变化的，因为回环帧的位姿是固定的。
 
 # 5. 全局位姿图优化
+
+<div align=center>
+  <img src="../images/vins_mono/global_pose_graph_optimization.png">
+</div>
+
+因为之前做的非线性优化本质只是在一个滑窗之内求解出了相机的位姿，而且在回环检测部分，利用固定位姿的回环帧只是纠正了滑窗内的相机位姿，并没有修正其他位姿(或者说没有将回环发现的误差分配到整个相机的轨迹上)，缺少全局的一致性，所以要做一次全局的Pose Graph。**全局的Pose Graph较之滑窗有一定的迟滞性，只有相机的Pose滑出滑窗的时候，Pose才会被加到全局的Pose Graph当中。**
+
+## 4DOF位姿图优化
 
 
 # 参考文献
