@@ -14,23 +14,32 @@ tags: [SLAM]
   <img src="../images/vins_mono/vins_mono_framework.png">
 </div>
 
+**Monocular visual-inertial odometry** with relocalization achieved via **nonlinear graph optimization-based, tightly-coupled, sliding window, visual-inertial bundle adjustment**.
+
 * 代码（注释版）：[cggos/vins_mono_cg](https://github.com/cggos/vins_mono_cg)
 
 # 1. 测量预处理
 
-## 1.1 视觉处理前端
+## 1.1 前端视觉处理
 
-* 自适应直方图均衡化（ `cv::CLAHE` ）
-* 掩模处理，特征点均匀分布（`setMask`）
-* 提取图像Harris角点（`cv::goodFeaturesToTrack`）
-* 金字塔光流跟踪（`cv::calcOpticalFlowPyrLK`）
-* 本质矩阵(RANSAC)去除异常点（`rejectWithF`）
-* 发布feature_points(id_of_point, un_pts, cur_pts, pts_velocity)
+* Simple feature processing pipeline
+  * 自适应直方图均衡化（ `cv::CLAHE` ）
+  * 掩模处理，特征点均匀分布（`setMask`）
+  * 提取图像Harris角点（`cv::goodFeaturesToTrack`）
+  * KLT金字塔光流跟踪（`cv::calcOpticalFlowPyrLK`）
+  * 连续帧跟踪
+  * 本质矩阵(RANSAC)去除外点点（`rejectWithF`）
+  * 发布feature_points(id_of_point, un_pts, cur_pts, pts_velocity)
+
+* Keyframe selection
+  - Case 1: Rotation-compensated average feature parallax is larger than a threshold
+  - Case 2: Number of tracked features in the current frame is less than a threshold
+  - All frames are used for optimization, but non-keyframes are removed first
 
 ## 1.2 IMU 预积分
 
 <div align=center>
-  <img src="../images/vins_mono/imu_integration.png">
+  <img src="../images/vins_mono/imu_integration_01.png">
 </div>
 
 ### IMU 测量方程
@@ -46,12 +55,18 @@ $$
 
 ### 预积分方程
 
-#### IMU估计值
+（1）**IMU integration in world frame**
 
 由上面的IMU测量方程积分就可以计算出下一时刻的p、v和q：  
 
 <div align=center>
   <img src="../images/vins_mono/imu_integration_world.png">
+</div>
+
+（2）**IMU integration in the body frame of first pose of interests**
+
+<div align=center>
+  <img src="../images/vins_mono/imu_integration_02.png">
 </div>
 
 为避免重新传播IMU观测值，选用IMU预积分模型，从世界坐标系转为本体坐标系
@@ -60,7 +75,7 @@ $$
   <img src="../images/vins_mono/formular_w_b.png">
 </div>
 
-则 IMU测量模型（**估计值**）为
+则 预积分IMU测量模型（**估计值**）为
 
 $$
 \begin{bmatrix}
@@ -73,16 +88,15 @@ $$
 \begin{bmatrix}
 R^{b_{k}}_{w}
 (p^{w}_{b_{k+1}}-p_{b_{k}}^{w}+\frac{1}{2}g^{w}\Delta t^{2}-v_{b_{k}}^{w}\Delta t) \\
-p_{b_{k}}^{w^{-1}}\otimes q^{w}_{b_{k+1}}\\
+q_{b_{k}}^{w^{-1}}\otimes q^{w}_{b_{k+1}}\\
 R^{b_{k}}_{w}(v^{w}_{b_{k+1}}+g^{w}\Delta t-v_{b_{k}}^{w})\\
 b_{ab_{k+1}}-b_{ab_{k}}\\
 b_{wb_{k+1}}-b_{wb_{k}}
 \end{bmatrix}
 $$
 
-#### IMU测量值
 
-离散状态下采用 **中值法积分** 的预积分方程（预积分测量值）为
+离散状态下采用 **中值法积分** 的预积分方程（预积分 **测量值**）为
 
 $$
 \begin{aligned}
@@ -139,13 +153,13 @@ $$
 \in \mathbb{R}^{15 \times 1}
 $$
 
-根据参考文献[2]中 ***5.3.3 The error-state kinematics*** 小节公式  
+根据ESKF中 ***5.3.3 The error-state kinematics*** 小节公式  
 
 <div align=center>
   <img src="../images/vins_mono/formular_eskf_533.png">
 </div>
 
-对于 **中值法积分** 下的误差状态方程为  
+对于 **中值积分** 下的 **误差状态方程** 为  
 
 $$
 \dot{\delta X_k} =
@@ -257,7 +271,7 @@ $$
 
 此处 $F'$ 即代码中 $F$，相关代码见 `midPointIntegration`。
 
-最后得到系统的 **雅克比矩阵** $J_{k+1}$ 和 **协方差矩阵** $P_{k+1}$，初始状态下的雅克比矩阵和协方差矩阵为 **单位阵** 和 **零矩阵**
+最后得到 **IMU预积分测量关于IMU Bias** 的 **雅克比矩阵** $J_{k+1}$ 和 IMU预积分测量的 **协方差矩阵** $P_{k+1}$，初始状态下的雅克比矩阵和协方差矩阵为 **单位阵** 和 **零矩阵**
 
 $$
 \begin{aligned}
@@ -270,7 +284,7 @@ P_{k+1} &= F' P_k F'^T + V Q V^T,
 \end{aligned}
 $$
 
-当bias估计轻微改变时，我们可以使用如下的一阶近似 **对中值积分得到的预积分测量值进行矫正**，而不重传播，从而得到 **更加精确的预积分测量值**
+当bias估计轻微改变时，我们可以使用如下的一阶近似 **对中值积分得到的预积分测量值进行矫正**，而不重传播，从而得到 **更加精确的预积分测量值**（bias修正的线性模型）
 
 $$
 \begin{aligned}
@@ -717,7 +731,7 @@ $$
 \end{aligned}
 $$
 
-进而得到系统优化的代价函数
+进而得到系统优化的代价函数（Minimize residuals from all sensors）
 
 $$
 \underset{X}{min}
@@ -732,8 +746,11 @@ r_{B}(\hat{z}^{b_{k}}_{b_{k+1}},X)
 r_{C}(\hat{z}^{c_{j}}_{l},X)
 \right \|^{2}_{P^{c_{j}}_{l}}
 \end{Bmatrix}
-\tag{4.2}
 $$
+
+<div align=center>
+  <img src="../images/vins_mono/formular_residuals.png">
+</div>
 
 其中三个残差项依次是
 
@@ -743,7 +760,11 @@ $$
 
 三种残差都是用 **马氏距离**（与量纲无关） 来表示的。
 
+**Motion-only visual-inertial bundle adjustment**: Optimize **position, velocity, rotation** in a smaller windows, assuming all other quantities are fixed
+
 ## 3.1 IMU 测量残差
+
+（1）IMU 测量残差
 
 上面的IMU预积分（估计值 - 测量值），得到IMU测量残差
 
@@ -767,7 +788,7 @@ b_{gb_{k+1}}-b_{gb_{k}}
 \end{aligned}
 $$
 
-其中 $[\hat{\alpha }^{b_{k}}_{b_{k+1}},\hat{\gamma  }^{b_{k}}_{b_{k+1}},\hat{\beta }^{b_{k}}_{b_{k+1}}]$ 为 **IMU预积分修正值**。
+其中 $[\hat{\alpha }^{b_{k}}_{b_{k+1}},\hat{\gamma  }^{b_{k}}_{b_{k+1}},\hat{\beta }^{b_{k}}_{b_{k+1}}]$ 为 **IMU预积分Bias修正值**。
 
 ```c++
 /**
@@ -808,6 +829,10 @@ Eigen::Matrix<double, 15, 1> evaluate(
 }
 ```
 
+（2）协方差矩阵
+
+此处用到的协方差矩阵为前面IMU预积分计算出的协方差矩阵。
+
 残差的后处理对应代码：
 
 ```c++
@@ -826,6 +851,8 @@ residual = sqrt_info * residual; // 为了保证 IMU 和 视觉參差项在尺�
 这里残差 residual 乘以 sqrt_info，这是因为真正的优化项其实是 Mahalanobis 距离: $d = r^T P^{-1} r$，其中 $P$ 是协方差。Mahalanobis距离 其实相当于一个残差加权，协方差大的加权小，协方差小的加权大，着重优化那些比较确定的残差。  
 
 **而 ceres只接受最小二乘优化，也就是 $\min e^T e$，所以把 $P^{-1}$ 做 LLT分解，即 $LL^T=P^{−1}$，则 $d = r^T (L L^T) r = (L^T r)^T (L^T r)$，令 $r' = (L^T r)$，作为新的优化误差，所以 sqrt_info 等于 $L^T$。**
+
+（3）雅克比矩阵
 
 高斯迭代优化过程中会用到IMU测量残差对状态量的雅克比矩阵，但此处我们是 **对误差状态量求偏导**，下面对四部分误差状态量求取雅克比矩阵。
 
@@ -884,13 +911,15 @@ $$
 雅克比矩阵计算的对应代码在 `class IMUFactor : public ceres::SizedCostFunction<15, 7, 9, 7, 9>` 中的 `Evaluate()` 函数中。
 
 
-## 3.2 视觉 测量残差
+## 3.2 视觉(td) 测量残差
+
+视觉测量残差 即 **特征点的重投影误差**，视觉残差和雅克比矩阵计算的对应代码在 `ProjectionFactor::Evaluate` 函数中。
+
+（1）切平面重投影误差（Spherical camera model）
 
 <div align=center>
   <img src="../images/vins_mono/visual_residual_sphere.png">
 </div>
-
-视觉测量残差 即 **特征点的重投影误差**
 
 $$
 r_{C}=(\hat{z}_{l}^{c_{j}},X)=[b_{1},b_{2}]^{T}\cdot (\bar{P}_{l}^{c_{j}}-\frac{P_{l}^{c_{j}}}{\left \| P_{l}^{c_{j}} \right \|})
@@ -910,6 +939,38 @@ Eigen::Vector3d pts_w        = Qi * pts_imu_i + Pi;               // pt in world
 Eigen::Vector3d pts_imu_j    = Qj.inverse() * (pts_w - Pj);       // pt in jth body frame
 Eigen::Vector3d pts_camera_j = qic.inverse() * (pts_imu_j - tic); // pt in jth camera frame
 ```
+
+（2）像素重投影误差（Pinhole camera model）
+
+$$
+r_{C}=(\hat{z}_{l}^{c_{j}},X) =
+( \frac{f}{1.5} \cdot I_{2 \times 2} ) \cdot
+{(\frac{\bar{P}_{l}^{c_{j}}}{\bar{Z}}-\frac{P_{l}^{c_{j}}}{Z_j})}_2
+$$
+
+```c++
+Eigen::Map<Eigen::Vector2d> residual(residuals);
+#ifdef UNIT_SPHERE_ERROR
+// 把归一化平面上的重投影误差投影到Unit sphere上的好处就是可以支持所有类型的相机 why
+// 求取切平面上的误差
+residual =  tangent_base * (pts_camera_j.normalized() - pts_j.normalized());
+#else
+// 求取归一化平面上的误差
+double dep_j = pts_camera_j.z();
+residual = (pts_camera_j / dep_j).head<2>() - pts_j.head<2>();
+#endif
+residual = sqrt_info * residual; // 转成 与量纲无关的马氏距离
+```
+
+（3）协方差矩阵
+
+固定的协方差矩阵，归一化平面的标准差为 $\frac{1.5}{f}$，即像素标准差为 $1.5$
+
+```c++
+ProjectionFactor::sqrt_info   = FOCAL_LENGTH / 1.5 * Matrix2d::Identity();
+```
+
+（4）雅克比矩阵
 
 下面关于误差状态量对相机测量残差求偏导，得到高斯迭代优化过程中的雅克比矩阵。
 
@@ -948,9 +1009,60 @@ J[3]=-q_{b}^{c}q_{w}^{b_{j}}q_{b_{i}}^{w}q_{c}^{b} \frac{\bar{P}_{l}^{c_{i}}}{\l
 \in \mathbb{R}^{3 \times 1}
 $$
 
-视觉残差和雅克比矩阵计算的对应代码在 `ProjectionFactor::Evaluate` 函数中。
+（5）Vision measurement residual for temporal calibration
 
-## 3.3 边缘化(Marginalization)
+视觉残差和雅克比矩阵计算的对应代码在 `ProjectionTdFactor::Evaluate` 函数中。
+
+<div align=center>
+  <img src="../images/vins_mono/visual_residual_temporal.png">
+</div>
+
+```c++
+// TR / ROW * row_i 是相机 rolling 到这一行时所用的时间
+Eigen::Vector3d pts_i_td, pts_j_td;
+pts_i_td = pts_i - (td - td_i + TR / ROW * row_i) * velocity_i;
+pts_j_td = pts_j - (td - td_j + TR / ROW * row_j) * velocity_j;
+
+Eigen::Vector3d pts_camera_i = pts_i_td / inv_dep_i;
+Eigen::Vector3d pts_imu_i    = qic * pts_camera_i + tic;
+Eigen::Vector3d pts_w        = Qi * pts_imu_i + Pi;
+Eigen::Vector3d pts_imu_j    = Qj.inverse() * (pts_w - Pj);
+Eigen::Vector3d pts_camera_j = qic.inverse() * (pts_imu_j - tic);
+
+Eigen::Map<Eigen::Vector2d> residual(residuals);
+#ifdef UNIT_SPHERE_ERROR
+residual =  tangent_base * (pts_camera_j.normalized() - pts_j_td.normalized());
+#else
+double dep_j = pts_camera_j.z();
+residual = (pts_camera_j / dep_j).head<2>() - pts_j_td.head<2>();
+#endif
+residual = sqrt_info * residual;
+```
+
+* 添加对 imu-camera 时间戳不完全同步和 Rolling Shutter 相机的支持：通过前端光流计算得到每个角点在归一化的速度，根据 imu-camera 时间戳的时间同步误差和Rolling Shutter相机做一次rolling的时间，对角点的归一化坐标进行调整
+
+## 3.3 Temporal Calibration
+
+### Timestamps
+
+<div align=center>
+  <img src="../images/vins_mono/timestamps.png">
+</div>
+
+### Time Synchronization
+
+<div align=center>
+  <img src="../images/vins_mono/time_synchronization.png">
+</div>
+
+### Temporal Calibration
+
+* calibrate **the fixed latency $t_d$** occurred during time stamping
+* change the **IMU pre-integration interval** to the **interval between two image timestamps**
+  - linear incorporation of IMU measurements to obtain the IMU reading at image time stamping
+  - estimates states(position, orientation, etc.) **at image time stamping**
+
+## 3.4 边缘化(Marginalization)
 
 > SLAM is tracking a noraml distribution through a large state space
 
@@ -982,6 +1094,12 @@ VINS-Mono中为了处理一些悬停的case，引入了一个two-way marginaliza
 
 ### Schur Complement
 
+* Marginalization via Schur complement on information matrix
+
+<div align=center>
+  <img src="../images/vins_mono/schur_complement.png">
+</div>
+
 ### First Estimate Jacobin
 
 # 4. 重定位
@@ -990,13 +1108,32 @@ VINS-Mono中为了处理一些悬停的case，引入了一个two-way marginaliza
   <img src="../images/vins_mono/relocalization.png">
 </div>
 
-## 4.1 闭环检测
+## 4.1 Loop Detection
 
-Vins-Mono还是利用词袋的形式来做Keyframe Database的构建和查询。在建立闭环检测的数据库时，关键帧的Features包括两部分：VIO部分的200个强角点和500 Fast角点，然后描述子仍然使用BRIEF(因为旋转可观，匹配过程中对旋转有一定的适应性，所以不用使用ORB)。
+Vins-Mono利用 **词袋 DBoW2** 做Keyframe Database的构建和查询。在建立闭环检测的数据库时，关键帧的Features包括两部分：**VIO部分的200个强角点 和 500个Fast角点**，然后描述子使用 **BRIEF** (因为旋转可观，匹配过程中对旋转有一定的适应性，所以不用使用ORB)。
 
-## 4.2 闭环校正
+* Describe features by BRIEF
+  - Features that we use in the VIO (200, not enough for loop detection)
+  - Extract new FAST features (500, only use for loop detection)
+* Query Bag-of-Word (DBoW2)
+  - Return loop candidates
 
-在闭环检测成功之后，会得到回环候选帧。所以要在已知位姿的回环候选帧和滑窗内的匹配帧做匹配，然后把回环帧加入到滑窗的优化当中，这时整个滑窗的状态量的维度是不发生变化的，因为回环帧的位姿是固定的。
+## 4.2 Feature Retrieval
+
+在闭环检测成功之后，会得到回环候选帧，所以要在已知位姿的回环候选帧和滑窗内的匹配帧通过 **BRIEF描述子匹配**，然后把回环帧加入到滑窗的优化当中，这时整个滑窗的状态量的维度是不发生变化的，因为回环帧的位姿是固定的。
+
+* Try to retrieve matches for features (200) that are used in the VIO
+* BRIEF descriptor match
+* Geometric check
+  - 2D-2D: fundamental matrix test with RANSAC
+  - 3D-3D: PnP test with RANSAC
+  - At least 30 inliers
+
+<div align=center>
+  <img src="../images/vins_mono/loop_closure_outlier_removal.jpg">
+</div>
+
+## 4.3 Tightly-Coupled Relocalization
 
 # 5. 全局位姿图优化
 
@@ -1006,11 +1143,48 @@ Vins-Mono还是利用词袋的形式来做Keyframe Database的构建和查询。
 
 因为之前做的非线性优化本质只是在一个滑窗之内求解出了相机的位姿，而且在回环检测部分，利用固定位姿的回环帧只是纠正了滑窗内的相机位姿，并没有修正其他位姿(或者说没有将回环发现的误差分配到整个相机的轨迹上)，缺少全局的一致性，所以要做一次全局的Pose Graph。**全局的Pose Graph较之滑窗有一定的迟滞性，只有相机的Pose滑出滑窗的时候，Pose才会被加到全局的Pose Graph当中。**
 
-## 4DOF位姿图优化
+**(1) Adding Keyframes into the Pose Graph**
+
+* Sequential edges from VIO
+  - Connected with 4 previous keyframes
+* Loop closure edges
+  - Only added when a keyframe is marginalized out from the sliding window VIO
+  - Multi-constraint relocalization helps eliminating false loop closures
+  - Huber norm for rejection of wrong loops
+
+**(2) 4-DOF Pose Graph Optimization**
+
+* Roll and pitch are observable from VIO
+
+**(3) Pose Graph Management**
+
+**(4) Map Reuse**
+
+* Save map at any time
+* Load map and re-localize with respect to it
+* Pose graph merging
+
+# 6. Remarks on Monocular Visual-Inertial SLAM
+
+* Important factors
+  * Access to raw camera data (especially for rolling shutter cameras)
+  * Sensor synchronization and timestamps
+  * Camera-IMU rotation
+  * Estimator initialization
+* Not-so-important factors
+  * Camera-IMU translation
+  * Types of features (we use the simplest corner+KLT)
+  * Quality of feature tracking (outlier is acceptable)
+* Failures – need more engineering treatment
+  * Long range scenes (aerial vehicles)
+  * Constant velocity (ground vehicle)
+  * Pure rotation (augmented reality)
+* Be aware of computational power requirement
 
 
 # 参考文献
 
 * [1] VINS-Mono: A Robust and Versatile Monocular Visual-Inertial State Estimator  
 * [2] Quaternion kinematics for the error-state Kalman filter
-* [3] Xiaobuyi, [VINS-Mono代码分析总结](https://www.zybuluo.com/Xiaobuyi/note/866099)
+* [3] Shaojie Shen, Monocular Visual-Inertial SLAM slides, 2018
+* [4] Xiaobuyi, [VINS-Mono代码分析总结](https://www.zybuluo.com/Xiaobuyi/note/866099)
