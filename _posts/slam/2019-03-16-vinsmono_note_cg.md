@@ -28,7 +28,7 @@ tags: [SLAM]
   * 提取图像Harris角点（`cv::goodFeaturesToTrack`）
   * KLT金字塔光流跟踪（`cv::calcOpticalFlowPyrLK`）
   * 连续帧跟踪
-  * 本质矩阵(RANSAC)去除外点点（`rejectWithF`）
+  * 本质矩阵(RANSAC)去除外点（`rejectWithF`）
   * 发布feature_points(id_of_point, un_pts, cur_pts, pts_velocity)
 
 * Keyframe selection
@@ -271,13 +271,16 @@ $$
 
 此处 $F'$ 即代码中 $F$，相关代码见 `midPointIntegration`。
 
-最后得到 **IMU预积分测量关于IMU Bias** 的 **雅克比矩阵** $J_{k+1}$ 和 IMU预积分测量的 **协方差矩阵** $P_{k+1}$，初始状态下的雅克比矩阵和协方差矩阵为 **单位阵** 和 **零矩阵**
+最后得到 **IMU预积分测量关于IMU Bias** 的 **雅克比矩阵** $J_{k+1}$ 、IMU预积分测量的 **协方差矩阵** $P_{k+1}$ 和 噪声的 **协方差矩阵 $Q$**，初始状态下的雅克比矩阵和协方差矩阵为 **单位阵** 和 **零矩阵**
 
 $$
 \begin{aligned}
-J_{k+1} &= F' J_k \\
-P_{k+1} &= F' P_k F'^T + V Q V^T,
-\quad Q = \text{diag}(
+J_{b_k} &= I \\
+P_{b_{k}}^{b_k} &= 0 \\
+J_{t+\delta t} &= F' J_t = (I + F_t \delta t) J_t, \quad t \in [k, k+1] \\
+P_{t+\delta t}^{b_k} &= F' P_t^{b_k} F'^T + V Q V^T \\
+&= (I + F_t \delta t) P_{t}^{b_k} (I + F_t \delta t) + (G_t \delta t) Q (G_t \delta t) \\
+Q &= \text{diag}(
   \sigma_{a_0}^2 \quad \sigma_{\omega_0}^2 \quad
   \sigma_{a_1}^2 \quad \sigma_{\omega_1}^2 \quad
   \sigma_{b_a}^2 \quad \sigma_{b_g}^2) \in \mathbb{R}^{18 \times 18}
@@ -779,9 +782,9 @@ r_{B}(\hat{z}^{b_{k}}_{b_{k+1}},X)=
 0
 \end{bmatrix}
 &=\begin{bmatrix}
-q^{b_{k}}_{w}(p^{w}_{b_{k+1}}-p_{b_{k}}^{w}+\frac{1}{2}g^{w}\Delta t^{2}-v_{b_{k}}^{w}\Delta t)-\hat{\alpha }^{b_{k}}_{b_{k+1}}\\
-[q_{b_{k+1}}^{w^{-1}}\otimes q^{w}_{b_{k}}\otimes \hat{\gamma  }^{b_{k}}_{b_{k+1}}]_{xyz}\\
-q^{b_{k}}_{w}(v^{w}_{b_{k+1}}+g^{w}\Delta t-v_{b_{k}}^{w})-\hat{\beta }^{b_{k}}_{b_{k+1}}\\
+R^{b_{k}}_{w}(p^{w}_{b_{k+1}}-p_{b_{k}}^{w}+\frac{1}{2}g^{w}\Delta t^{2}-v_{b_{k}}^{w}\Delta t)-\hat{\alpha }^{b_{k}}_{b_{k+1}}\\
+2{[{q_{b_{k}}^{w}}^{-1} \otimes q^{w}_{b_{k+1}} \otimes (\hat{\gamma  }^{b_{k}}_{b_{k+1}})^{-1}]}_{xyz} \\
+R^{b_{k}}_{w}(v^{w}_{b_{k+1}}+g^{w}\Delta t-v_{b_{k}}^{w})-\hat{\beta }^{b_{k}}_{b_{k+1}} \\
 b_{ab_{k+1}}-b_{ab_{k}}\\
 b_{gb_{k+1}}-b_{gb_{k}}
 \end{bmatrix}
