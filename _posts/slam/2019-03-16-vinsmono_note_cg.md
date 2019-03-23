@@ -323,7 +323,7 @@ $$
 
 相机与IMU之间的旋转标定非常重要，**偏差1-2°系统的精度就会变的极低**。
 
-设相机利用对极关系得到的旋转矩阵为 $R^{c_{k}}_{c_{k+1}}$，IMU经过预积分得到的旋转矩阵为$R^{b_{k}}_{b_{k+1}}$，相机与IMU之间的相对旋转为 $R^{b}_{c}$，则对于任一帧满足，
+设相机利用对极关系得到的旋转矩阵为 $R_{c_{k+1}}^{c_k}$ ，IMU经过预积分得到的旋转矩阵为 $R_{b_{k+1}}^{b_{k}}$，相机与IMU之间的相对旋转为 $R_{c}^{b}$，则对于任一帧满足，
 
 $$
 R^{b_{k}}_{b_{k+1}}R^{b}_{c}=R^{b}_{c}R^{c_{k}}_{c_{k+1}}
@@ -388,9 +388,9 @@ w^{k}_{k+1}=
 \end{matrix}\right.
 $$
 
-至此，就可以通过求解方程 $Q_{N}q^{b}_{c}=0$ 得到相对旋转，解为 $Q_{N}$ 的左奇异向量中最小奇异值对应的特征向量。
+至此，就可以通过求解方程 $Q_N q_c^b=0$ 得到相对旋转，解为 $Q_N$ 的左奇异向量中最小奇异值对应的特征向量。
 
-但是，在这里还要注意 __求解的终止条件(校准完成的终止条件)__ 。在足够多的旋转运动中，我们可以很好的估计出相对旋转 $R^{b}_{c}$，这时 $Q_{N}$ 对应一个准确解，且其零空间的秩为1。但是在校准的过程中，某些轴向上可能存在退化运动(如匀速运动)，这时 $Q_{N}$ 的零空间的秩会大于1。判断条件就是 $Q_{N}$ 的第二小的奇异值是否大于某个阈值，若大于则其零空间的秩为1，反之秩大于1，相对旋转$R^{b}_{c}$ 的精度不够，校准不成功。  
+但是，在这里还要注意 __求解的终止条件(校准完成的终止条件)__ 。在足够多的旋转运动中，我们可以很好的估计出相对旋转 $R_{c}^{b}$，这时 $Q_{N}$ 对应一个准确解，且其零空间的秩为1。但是在校准的过程中，某些轴向上可能存在退化运动(如匀速运动)，这时 $Q_{N}$ 的零空间的秩会大于1。判断条件就是 $Q_N$ 的第二小的奇异值是否大于某个阈值，若大于则其零空间的秩为1，反之秩大于1，相对旋转 $R_{c}^{b}$ 的精度不够，校准不成功。  
 
 对应代码在 `InitialEXRotation::CalibrationExRotation` 中。
 
@@ -458,8 +458,7 @@ if(var < 0.25) //! 以标准差判断可观性
 * PnP求解位姿（`cv::solvePnP`）
 * 转换到IMU坐标系下
 * $c_0$ 坐标系作为参考系
-
-不断重复的过程，直到恢复出滑窗内的Features和相机位姿
+* 不断重复直到恢复出滑窗内的Features和相机位姿
 
 ## 2.4 视觉与IMU对齐
 
@@ -608,7 +607,7 @@ s\bar{p}^{c_{0}}_{c_{k}} - R^{c_{0}}_{b_{k}}p_{c}^{b}
 \end{aligned}
 $$
 
-所以，定义相邻两帧之间的IMU预积分出的增量 （$\hat{\alpha}^{b_{k}}_{b_{k+1}}$，$\hat{\beta}^{b_{k}}_{b_{k+1}}$）与预测值之间的残差，即
+所以，定义相邻两帧之间的IMU预积分出的增量（${\hat{\alpha}}_{b_{k+1}}^{b_{k}}$，${\hat{\beta}}_{b_{k+1}}^{b_{k}}$）与预测值之间的残差，即
 
 $$
 \begin{aligned}
@@ -629,7 +628,7 @@ R^{c_0}_{b_k} v^{b_k}_{b_{k}})
 \end{aligned}
 $$
 
-令 $r(\hat{z}^{b_{k}}_{b_{k+1}}, X_I) = \mathbf{0}$，转换成 $Hx=b$ 的形式
+令 $r(\hat{z}_{b_{k+1}}^{b_{k}}, X_I)=\mathbf{0}$，转换成 $Hx=b$ 的形式
 
 $$
 \begin{bmatrix}
@@ -1188,6 +1187,6 @@ Vins-Mono利用 **词袋 DBoW2** 做Keyframe Database的构建和查询。在建
 # 参考文献
 
 * [1] VINS-Mono: A Robust and Versatile Monocular Visual-Inertial State Estimator  
-* [2] Quaternion kinematics for the error-state Kalman filter
-* [3] Shaojie Shen, Monocular Visual-Inertial SLAM slides, 2018
+* [2] Shaojie Shen, Monocular Visual-Inertial SLAM slides, 2018
+* [3] Quaternion kinematics for the error-state Kalman filter
 * [4] Xiaobuyi, [VINS-Mono代码分析总结](https://www.zybuluo.com/Xiaobuyi/note/866099)
