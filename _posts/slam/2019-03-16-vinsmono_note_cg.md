@@ -269,7 +269,7 @@ $$
 \delta X_{k+1} = F' \delta X_k + V n
 $$
 
-此处 $F'$ 即代码中 $F$，相关代码见 `midPointIntegration`。
+此处 $F'$ 即代码中 `F`，相关代码见 `midPointIntegration`。
 
 最后得到 **IMU预积分测量关于IMU Bias** 的 **雅克比矩阵** $J_{k+1}$ 、IMU预积分测量的 **协方差矩阵** $P_{k+1}$ 和 噪声的 **协方差矩阵 $Q$**，初始状态下的雅克比矩阵和协方差矩阵为 **单位阵** 和 **零矩阵**
 
@@ -308,6 +308,12 @@ J^{\beta}_{b_{\omega}} \delta {b_{\omega}}_k \\
 \end{bmatrix}
 \end{aligned}
 $$
+
+此时，可以与 **卡尔曼滤波** 对比一下：
+
+<div align=center>
+  <img src="../images/kalman_filter/kalman_filter_matrix_process_flowchart.jpg">
+</div>
 
 
 # 2. 初始化(松耦合)
@@ -697,7 +703,7 @@ $$
 
 同样，通过Cholosky分解求得 $g^{c_{0}}$，即相机 $C_0$ 系下的重力向量。
 
-最后，通过将 $g^{c_{0}}$ 旋转至惯性坐标系（世界系）中的 z 轴方向[0,0,1]，可以计算第一帧相机系到惯性系的旋转矩阵 $q_{c_0}^w$，这样就可以将所有变量调整至惯性世界系中。
+最后，通过将 $g^{c_{0}}$ 旋转至惯性坐标系（世界系）中的 z 轴方向[0,0,1]，可以计算第一帧相机系到惯性系的旋转矩阵 $q_{c_0}^w$，这样就可以将所有变量调整至惯性世界系（**水平坐标系**，z轴与重力方向对齐）中。
 
 对应代码：`RefineGravity`
 
