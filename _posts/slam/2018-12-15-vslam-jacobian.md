@@ -353,7 +353,14 @@ $$
   1 & 0 & 0 &   0  &  Z' &  -Y' \\
   0 & 1 & 0 & -Z' &   0  &   X' \\
   0 & 0 & 1 &  Y' & -X' &    0
-\end{bmatrix} \cdot \frac{1}{Z'}
+\end{bmatrix} \cdot \frac{1}{Z'} \\
+&=
+\begin{bmatrix}
+\frac{f_x}{Z'} & 0 & -\frac{X'f_x}{Z'^2} &
+-\frac{X'Y'f_x}{Z'^2} & f_x+\frac{X'^2f_x}{Z'^2} & -\frac{Y'f_x}{Z'} \\
+0 & \frac{f_y}{Z'} & -\frac{Y'f_y}{Z'^2} &
+-f_y-\frac{Y'^2f_y}{Z'^2} & \frac{X'Y'f_y}{Z'^2} & \frac{X'f_y}{Z'}
+\end{bmatrix}
 \end{aligned}
 $$
 
