@@ -2,7 +2,7 @@
 layout: post
 title: "Ceres-Solver 从入门到上手视觉SLAM位姿优化问题"
 date: 2019-03-24
-categories: Math, SLAM
+categories: SLAM, Math
 tags: [Math]
 ---
 
@@ -222,7 +222,17 @@ $$
 （2）雅克比矩阵
 
 $$
-J = \frac{\partial r(\xi)}{\partial \xi} \in \mathbb{R}^{2 \times 6}
+\begin{aligned}
+J
+&= \frac{\partial r(\xi)}{\partial \xi} \\
+&=
+\begin{bmatrix}
+\frac{f_x}{Z'} & 0 & -\frac{X'f_x}{Z'^2} &
+-\frac{X'Y'f_x}{Z'^2} & f_x+\frac{X'^2f_x}{Z'^2} & -\frac{Y'f_x}{Z'} \\
+0 & \frac{f_y}{Z'} & -\frac{Y'f_y}{Z'^2} &
+-f_y-\frac{Y'^2f_y}{Z'^2} & \frac{X'Y'f_y}{Z'^2} & \frac{X'f_y}{Z'}
+\end{bmatrix}  \in \mathbb{R}^{2 \times 6}
+\end{aligned}
 $$
 
 * 雅克比矩阵的具体求导，可参考我的另一篇博客 [视觉SLAM位姿优化时误差函数雅克比矩阵的计算](https://blog.csdn.net/u011178262/article/details/85016981)
