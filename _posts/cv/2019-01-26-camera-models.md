@@ -32,12 +32,17 @@ tags: [Camera Model]
 * Catoptric: All elements are reflective (mirrors)
 * Catadioptric: Elements are refractive and reflective (mirrors + lenses)
 
+## Camera Models
+
+* [Double Sphere Camera Model (TUM)](https://vision.in.tum.de/research/vslam/double-sphere)
+
 
 ## Papers
 
 * *Straight Lines Have to be Straight: Automatic Calibration and Removal of Distortion from Scenes of Structured Environments*
 * *A Generic Camera Model and Calibration Method for Conventional, Wide-Angle, and Fish-Eye Lenses*
 * *Single View Point Omnidirectional Camera Calibration from Planar Grids*
+* *The Double Sphere Camera Model*
 
 ## Related Code
 
