@@ -2,8 +2,8 @@
 layout: post
 title: "Ceres-Solver 从入门到上手视觉SLAM位姿优化问题"
 date: 2019-03-24
-categories: SLAM, Math
-tags: [Math]
+categories: SLAM
+tags: [SLAM, Math]
 ---
 
 [TOC]
@@ -16,6 +16,7 @@ tags: [Math]
 
 * 构建代价函数(cost function) 或 残差(residual)
 * 构建优化问题(`ceres::Problem`)：通过 `AddResidualBlock` 添加代价函数(cost function)、损失函数(loss function) 和 待优化状态量
+  - **LossFunction**: a scalar function that is used to reduce the influence of outliers on the solution of non-linear least squares problems.
 * 配置求解器(`ceres::Solver::Options`)
 * 运行求解器(`ceres::Solve(options, &problem, &summary)`)
 
