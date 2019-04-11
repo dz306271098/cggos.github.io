@@ -16,11 +16,13 @@ tags: [Sensor Calibration]
 
 本文以 **单目+IMU** 和 **双目+IMU** 为例，讲解使用 **Kalibr工具** 标定 **Camera-IMU**，其中使用的摄像头分别为 **Realsense ZR300** 和 **MYNT-EYE S系列摄像头**。
 
+**注意**：本文用于学习kalibr标定过程，文中结果仅供参考。
+
 # 1. 标定 Camera
 
-## kalibr_calibrate_cameras
+## 采集 images
 
-### 采集 images
+**注意**： 采集图像时，帧率控制在4帧左右
 
 * 单目
 
@@ -34,14 +36,14 @@ tags: [Sensor Calibration]
   rosbag record /stereo/left/image_raw /stereo/right/image_raw -O images.bag
   ```
 
-### 标定 Camera
+## 标定 Camera
 
 * 单目
 
   ```bash
   kalibr_calibrate_cameras \
       --target april_6x6_24x24mm.yaml \
-      --bag images.bag \
+      --bag images.bag --bag-from-to 5 20 \
       --models pinhole-fov \
       --topics /camera/fisheye/image_raw
   ```
@@ -51,12 +53,20 @@ tags: [Sensor Calibration]
   ```bash
   kalibr_calibrate_cameras \
       --target april_6x6_24x24mm.yaml \
-      --bag images.bag \
+      --bag images.bag --bag-from-to 5 30 \
       --models pinhole-radtan pinhole-radtan \
       --topics /stereo/left/image_raw /stereo/right/image_raw
   ```
 
-## Other Camera Calib Tools
+### 标定评估
+
+重投影误差在 **0.1~0.2** 以内，标定结果较好，如下所示。
+
+<div align=center>
+  <img src="../images/kalibr/kalibr_cam_result.jpg">
+</div>
+
+### Other Camera Calib Tools
 
 * ROS camera_calibration
 * PTAM Calibration ( ATAN / FOV camera model )
@@ -109,9 +119,9 @@ tags: [Sensor Calibration]
 
 # 2. 标定 IMU
 
-## [imu_utils](https://github.com/gaowenliang/imu_utils)
+* [imu_utils](https://github.com/gaowenliang/imu_utils): A ROS package tool to analyze the IMU performance, C++ version of Allan Variance Tool.
 
-### 采集 IMU 数据
+## 采集 IMU 数据
 
 * collect the data while the IMU is **Stationary**, with a **two hours** duration
 
@@ -119,7 +129,7 @@ tags: [Sensor Calibration]
 rosbag record /camera/imu/data_raw -O imu.bag
 ```
 
-### 标定 IMU
+## 标定 IMU
 
 ```bash
 rosbag play -r 200 imu.bag
@@ -176,8 +186,6 @@ Acc:
       acc_n: 2.9593506529964245e-02
       acc_w: 7.0255075105672530e-04
 ```
-
-## Other Camera Calib Tools
 
 ## 输出 imu.yaml
 
