@@ -194,8 +194,8 @@ $$
 \begin{aligned}
 	\begin{cases}
 	Z = depth = \frac{f' \cdot B}{d_p} \\
-	X = \frac{u-c_x}{f‘’} \cdot Z \\
-	Y = \frac{v-c_y}{f’} \cdot Z
+	X = \frac{u-{c_x}_1'}{f'} \cdot Z \\
+	Y = \frac{v-{c_y}'}{f'} \cdot Z
 	\end{cases}
 \end{aligned}
 \text{或}
@@ -203,8 +203,8 @@ $$
 	\begin{cases}
   bd = \frac{B}{d_p}\\
 	Z = depth = f' \cdot bd \\
-	X = (u-c_x) \cdot bd \\
-	Y = (u-c_y) \cdot bd
+	X = (u-{c_x}_1') \cdot bd \\
+	Y = (u-{c_y}') \cdot bd
 	\end{cases}
 \end{aligned}
 $$
