@@ -22,6 +22,7 @@ With the tutorial of w3school, I studied technology of Front End,which is as fol
 * install Jekyll: `sudo gem install jekyll -v=<version-num>`, its verison depends on **Gemfile.lock** in your project
 * install ruby-bundler: `sudo gem install bundler`
 * run in your project dir: `jekyll serve`
+* update **Gemfile**: delete **Gemfile.lock** and `bundle install`
 
 ## Add-ons
 * [博客园页面设置](http://www.cnblogs.com/zhaopei/p/4174811.html)
