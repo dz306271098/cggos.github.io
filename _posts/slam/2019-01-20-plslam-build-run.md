@@ -16,7 +16,7 @@ This code [rubengooj/pl-slam](https://github.com/rubengooj/pl-slam) contains an 
 
   ```bibtex
   @article{gomez2017pl,
-    title   = {{PL-SLAM: a Stereo SLAM System through the Combination of Points and Line Segments}},
+    title   = {PL-SLAM: a Stereo SLAM System through the Combination of Points and Line Segments},
     author  = {Gomez-Ojeda, Ruben and Zuñiga-Noël, David and Moreno, Francisco-Angel and Scaramuzza, Davide and Gonzalez-Jimenez, Javier},
     journal = {arXiv preprint arXiv:1705.09479},
     year    = {2017}
