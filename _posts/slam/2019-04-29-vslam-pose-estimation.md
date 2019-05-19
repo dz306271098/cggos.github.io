@@ -421,3 +421,4 @@ bool pose_estimation_direct(
 
 * 《视觉SLAM十四讲》
 * Lucas-Kanade 20 Years On: A Unifying Framework
+* [相机位姿求解问题？（知乎）](https://www.zhihu.com/question/51510464/answer/132005467)
