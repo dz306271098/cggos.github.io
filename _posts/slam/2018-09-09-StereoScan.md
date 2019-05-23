@@ -15,15 +15,13 @@ tags: [SLAM, 3D Reconstruction, Stereo Vision]
 
 ## Paper & Code
 * papers: ***StereoScan: Dense 3D Reconstruction in Real-time***
-* Code: [GaoHongchen/viso2_kinetic_cg](https://github.com/GaoHongchen/viso2_kinetic_cg)
+* code: [cggos/viso2_cg](https://github.com/cggos/viso2_cg)
 
 ## Scen Flow
-<!-- <figure>
-	<a href="/images/StereoScan/ScenFlow.png"><img src="/images/StereoScan/ScenFlow.png"></a>
-	<figcaption>ScenFlow</figcaption>
-</figure> -->
 
-![ScenFlow.png](../images/StereoScan/ScenFlow.png)
+<div align=center>
+  <img src="../images/StereoScan/ScenFlow.png">
+</div>
 
 # Feature Matching
 
@@ -31,7 +29,9 @@ tags: [SLAM, 3D Reconstruction, Stereo Vision]
 
 **Blob/Corner Detector:**
 
-![FeatureDetection.png](../images/StereoScan/FeatureDetection.png)
+<div align=center>
+  <img src="../images/StereoScan/FeatureDetection.png">
+</div>
 
 * filter the input images with **5×5 blob and corner masks**  
 * employ **non-maximum- and non-minimum-suppression** on the filtered images, resulting in feature candidates
@@ -40,7 +40,9 @@ tags: [SLAM, 3D Reconstruction, Stereo Vision]
 
 The descriptor concatenates **Sobel filter** responses using the layout given in below:
 
-![FeatureDescriptor.png](../images/StereoScan/FeatureDescriptor.png)
+<div align=center>
+  <img src="../images/StereoScan/FeatureDescriptor.png">
+</div>
 
 simply compare 11 × 11 block windows of horizontal and vertical Sobel filter responses to each other by using **the sum of absolute differences (SAD) error metric**; to speed-up matching, we quantize the **Sobel responses** to **8 bits** and sum the differences over a sparse set of **16 locations** instead of summing over the whole block window; since **the SAD of 16 bytes** can be computed efficiently using a single **SSE instruction** we only need two calls (for horizontal + vertical Sobel responses) in order to evaluate this error metric
 
@@ -53,11 +55,15 @@ simply compare 11 × 11 block windows of horizontal and vertical Sobel filter re
 
 Starting from all feature candidates in **the current left image**, we find the best match in **the previous left image** within a **M × M search window**, next in **the previous right image**, **the current right image** and last in **the current left image** again.
 
-![CircleMatch.png](../images/StereoScan/CircleMatch.png)
+<div align=center>
+  <img src="../images/StereoScan/CircleMatch.png">
+</div>
 
 A **’circle match’** gets accepted, if the last feature coincides with the first feature.
 
-![CircleMatchOrNot.png](../images/StereoScan/CircleMatchOrNot.png)
+<div align=center>
+  <img src="../images/StereoScan/CircleMatchOrNot.png">
+</div>
 
 * Detect interest points using non-maximum-suppression
 * Match 4 images in a ’space-time’ circle
@@ -73,7 +79,10 @@ A **’circle match’** gets accepted, if the last feature coincides with the f
 
 
 # Egomotion Estimation
-![Egomotion.png](../images/StereoScan/Egomotion.png)
+
+<div align=center>
+  <img src="../images/StereoScan/Egomotion.png">
+</div>
 
 ## Features Bucketing
 keeps only max_features per bucket, where the domain is split into buckets of size (bucket_width,bucket_height).
