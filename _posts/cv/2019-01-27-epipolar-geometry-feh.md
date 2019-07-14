@@ -27,37 +27,37 @@ Basic Epipolar Geometry entities for **pinhole cameras** and **panoramic camera*
 # Foundamental Matrix (基本矩阵)
 
 $$
-\boldsymbol{F} = \boldsymbol{K}'^{-T} \boldsymbol{E} \boldsymbol{K}^{-1}
+\mathbf{F} = \mathbf{K}'^{-T} \mathbf{E} \mathbf{K}^{-1}
 $$
 
 $$
-\boldsymbol{p}'^T \cdot \boldsymbol{F} \cdot \boldsymbol{p} = 0
+\mathbf{p}'^T \cdot \mathbf{F} \cdot \mathbf{p} = 0
 $$
 
-其中，$\boldsymbol{p}, \boldsymbol{p}'$ 为两个匹配 **像素点坐标**
+其中，$\mathbf{p}, \mathbf{p}'$ 为两个匹配 **像素点坐标**
 
-$\boldsymbol{F}$ 的性质：
+$\mathbf{F}$ 的性质：
 
 * 对其乘以 **任意非零常数**，对极约束依然满足（尺度等价性，up to scale）
-* 具有 **7个自由度**： 2x11-15=7 (why)
-* 奇异性约束 $\text{rank}(\boldsymbol{F})=2$
+* 具有 **7个自由度**： 9-2
+* 奇异性约束 $\text{rank}(\mathbf{F})=2$
 
-$\boldsymbol{F}$ 与 极线和极点 的关系：
+$\mathbf{F}$ 与 极线和极点 的关系：
 
 $$
-\boldsymbol{l}' = \boldsymbol{F} \cdot \boldsymbol{p} \\[2ex]
-\boldsymbol{l} = \boldsymbol{F}^T \cdot \boldsymbol{p}' \\[2ex]
-\boldsymbol{F} \cdot \boldsymbol{e} = \boldsymbol{F}^T \cdot \boldsymbol{e}' = 0
+\mathbf{l}' = \mathbf{F} \cdot \mathbf{p} \\[2ex]
+\mathbf{l} = \mathbf{F}^T \cdot \mathbf{p}' \\[2ex]
+\mathbf{F} \cdot \mathbf{e} = \mathbf{F}^T \cdot \mathbf{e}' = 0
 $$
 
-$\boldsymbol{F}$ 的计算：
+$\mathbf{F}$ 的计算：
 
 * Compute from 7 image point correspondences
 * 8点法（**Eight-Point Algorithm**）
 
 ## Foundamental Matrix Estimation
 
-* 类似于下面 $\boldsymbol{E}$ 的估计
+* 类似于下面 $\mathbf{E}$ 的估计
 
 
 # Essential Matrix (本质矩阵)
@@ -67,29 +67,29 @@ $\boldsymbol{F}$ 的计算：
 对极约束：
 
 $$
-\boldsymbol{E} = \boldsymbol{t}^\wedge \boldsymbol{R} \\[2ex]
-\boldsymbol{E} = \boldsymbol{K}'^{T} \boldsymbol{F} \boldsymbol{K} \\[2ex]
-{\boldsymbol{p}'}^T \cdot \boldsymbol{E} \cdot \boldsymbol{p} = 0
+\mathbf{E} = \mathbf{t}^\wedge \mathbf{R} \\[2ex]
+\mathbf{E} = \mathbf{K}'^{T} \mathbf{F} \mathbf{K} \\[2ex]
+{\mathbf{p}'}^T \cdot \mathbf{E} \cdot \mathbf{p} = 0
 $$
 
-其中，$\boldsymbol{p}, \boldsymbol{p}'$ 为两个匹配像素点的 **归一化平面坐标**
+其中，$\mathbf{p}, \mathbf{p}'$ 为两个匹配像素点的 **归一化平面坐标**
 
-$\boldsymbol{E}$ 的性质：
+$\mathbf{E}$ 的性质：
 
 * 对其乘以 **任意非零常数**，对极约束依然满足（尺度等价性，up to scale）
-* 根据 $\boldsymbol{E} = \boldsymbol{t}^\wedge \boldsymbol{R}$，$\boldsymbol{E}$ 的奇异值必定是 $[\sigma, \sigma, 0]^T$ 的形式
+* 根据 $\mathbf{E} = \mathbf{t}^\wedge \mathbf{R}$，$\mathbf{E}$ 的奇异值必定是 $[\sigma, \sigma, 0]^T$ 的形式
 * 具有 **5个自由度**：平移旋转共6个自由度 + 尺度等价性
-* 奇异性约束 $\text{rank}(\boldsymbol{E})=2$（因为 $\text{rank}(\boldsymbol{t^\wedge})=2$）
+* 奇异性约束 $\text{rank}(\mathbf{E})=2$（因为 $\text{rank}(\mathbf{t^\wedge})=2$）
 
-$\boldsymbol{E}$ 与 极线和极点 的关系：
+$\mathbf{E}$ 与 极线和极点 的关系：
 
 $$
-\boldsymbol{l}' = \boldsymbol{E} \cdot \boldsymbol{p} \\[2ex]
-\boldsymbol{l} = \boldsymbol{E}^T \cdot \boldsymbol{p}' \\[2ex]
-\boldsymbol{E} \cdot \boldsymbol{e} = \boldsymbol{E}^T \cdot \boldsymbol{e}' = 0
+\mathbf{l}' = \mathbf{E} \cdot \mathbf{p} \\[2ex]
+\mathbf{l} = \mathbf{E}^T \cdot \mathbf{p}' \\[2ex]
+\mathbf{E} \cdot \mathbf{e} = \mathbf{E}^T \cdot \mathbf{e}' = 0
 $$
 
-$\boldsymbol{E}$ 的计算：
+$\mathbf{E}$ 的计算：
 
 * 5点法（最少5对点求解）
 * 8点法（**Eight-Point Algorithm**）
@@ -110,7 +110,7 @@ e_{7} & e_{8} & e_{9}
 \begin{bmatrix} x \\ y \\ 1 \end{bmatrix} = 0
 $$
 
-矩阵 $\boldsymbol{E}$ 展开，写成向量形式 $\boldsymbol{e}$，并把所有点（n对点，n>=8）放到一个方程中，**齐次线性方程组** 如下：
+矩阵 $\mathbf{E}$ 展开，写成向量形式 $\mathbf{e}$，并把所有点（n对点，n>=8）放到一个方程中，**齐次线性方程组** 如下：
 
 $$
 \begin{bmatrix}
@@ -138,54 +138,54 @@ $$
 即（the essential matrix lying in **the null space of this matrix A**）
 
 $$
-\boldsymbol{A} \cdot \boldsymbol{e} = \mathbf{0}
+\mathbf{A} \cdot \mathbf{e} = \mathbf{0}
 \quad s.t. \quad
-\boldsymbol{A} \in \mathbb{R}^{n \times 9}, n \geq 8
+\mathbf{A} \in \mathbb{R}^{n \times 9}, n \geq 8
 $$
 
 对上式 求解 **最小二乘解**（尺度等价性）
 
 $$
-\min_{\boldsymbol{e}} \|\boldsymbol{A} \cdot \boldsymbol{e}\|^2
+\min_{\mathbf{e}} \|\mathbf{A} \cdot \mathbf{e}\|^2
 \quad s.t. \quad
-\|\boldsymbol{e}^T \boldsymbol{e}\| = 1
+\|\mathbf{e}\| = 1
 \quad \text{or} \quad
-{\|\boldsymbol{E}\|}_F = 1
+{\|\mathbf{E}\|}_F = 1
 $$
 
-SVD分解 $\boldsymbol{A}$（或者 特征值分解 $\boldsymbol{A}^T \boldsymbol{A}$）
+SVD分解 $\mathbf{A}$（或者 EVD分解 $\mathbf{A}^T \mathbf{A}$）
 
 $$
-\text{SVD}(\boldsymbol{A}) = \boldsymbol{U} \boldsymbol{D} \boldsymbol{V}^T
+\text{SVD}(\mathbf{A}) = \mathbf{U} \mathbf{D} \mathbf{V}^T
 $$
 
-$\boldsymbol{e}$ 正比于 $\boldsymbol{V}$ 的最后一列，得到 $\boldsymbol{E}$  
+$\mathbf{e}$ 正比于 $\mathbf{V}$ 的最后一列，得到 $\mathbf{E}$  
 
-根据 奇异性约束 $\text{rank}(\boldsymbol{E})=2$，再 SVD分解 $\boldsymbol{E}$  
-
-$$
-\text{SVD}(\boldsymbol{E}) =
-\boldsymbol{U}_E \boldsymbol{D}_E \boldsymbol{V}_E^T
-$$
-
-求出的 $\boldsymbol{E}$ 可能不满足其内在性质（奇异值是 $[\sigma, \sigma, 0]^T$ 的形式），此时对 $\boldsymbol{D}_E$ 进行调整，假设 $\boldsymbol{D}_E = \text{diag}(\sigma_1, \sigma_2, \sigma_3)$ 且 $\sigma_1 \geq \sigma_2 \geq \sigma_3$，则令  
+根据 奇异性约束 $\text{rank}(\mathbf{E})=2$，再 SVD分解 $\mathbf{E}$  
 
 $$
-\boldsymbol{D}_E' =
+\text{SVD}(\mathbf{E}) =
+\mathbf{U}_E \mathbf{D}_E \mathbf{V}_E^T
+$$
+
+求出的 $\mathbf{E}$ 可能不满足其内在性质（奇异值是 $[\sigma, \sigma, 0]^T$ 的形式），此时对 $\mathbf{D}_E$ 进行调整，假设 $\mathbf{D}_E = \text{diag}(\sigma_1, \sigma_2, \sigma_3)$ 且 $\sigma_1 \geq \sigma_2 \geq \sigma_3$，则令  
+
+$$
+\mathbf{D}_E' =
 \text{diag}(\frac{\sigma_1+\sigma_2}{2}, \frac{\sigma_1+\sigma_2}{2}, 0)
 $$
 
 或者，更简单的（尺度等价性）
 
 $$
-\boldsymbol{D}_E' = \text{diag}(1, 1, 0)
+\mathbf{D}_E' = \text{diag}(1, 1, 0)
 $$
 
-最后，$\boldsymbol{E}$ 矩阵的正确估计为
+最后，$\mathbf{E}$ 矩阵的正确估计为
 
 $$
-\boldsymbol{E}' =
-\boldsymbol{U}_E \boldsymbol{D}_E' \boldsymbol{V}_E^T
+\mathbf{E}' =
+\mathbf{U}_E \mathbf{D}_E' \mathbf{V}_E^T
 $$
 
 ## Rotation and translation from E
@@ -318,7 +318,7 @@ void Initializer::DecomposeE(const cv::Mat &E, cv::Mat &R1, cv::Mat &R2, cv::Mat
 **单应性矩阵** 通常描述处于 **共同平面** 上的一些点在 **两张图像之间的变换关系**。
 
 $$
-\boldsymbol{p'} = \boldsymbol{H} \cdot \boldsymbol{p}
+\mathbf{p'} = \mathbf{H} \cdot \mathbf{p}
 $$
 
 其中，$p, p'$ 为两个匹配像素点的 **归一化平面坐标** （也可为其他点，只要 **共面且3点不共线** 即可）
@@ -353,9 +353,9 @@ $$
 
 因为上式使用的是齐次坐标，所以我们可以 **对 所有的 $h_{ij}$ 乘以 任意的非0因子** 而不会改变方程。
 
-因此， $\boldsymbol{H}$ 具有 **8个自由度**，最少通过 **4对匹配点（不能出现3点共线）** 算出。
+因此， $\mathbf{H}$ 具有 **8个自由度**，最少通过 **4对匹配点（不能出现3点共线）** 算出。
 
-实际中，通过 **$h_{33}=1$** 或 **$\|\boldsymbol{H}\|_F=1$** 两种方法 使 $\boldsymbol{H}$ 具有 8自由度。
+实际中，通过 **$h_{33}=1$** 或 **$\|\mathbf{H}\|_F=1$** 两种方法 使 $\mathbf{H}$ 具有 8自由度。
 
 ### cont 1: H元素h33=1
 
@@ -366,21 +366,21 @@ $$
 线性方程：
 
 $$
-\boldsymbol{A} \cdot \boldsymbol{h} = \boldsymbol{b}
+\mathbf{A} \cdot \mathbf{h} = \mathbf{b}
 $$
 
 求解：
 
 $$
-\boldsymbol{A}^T \boldsymbol{A} \cdot \boldsymbol{h} =
-\boldsymbol{A}^T \boldsymbol{b}
+\mathbf{A}^T \mathbf{A} \cdot \mathbf{h} =
+\mathbf{A}^T \mathbf{b}
 $$
 
 所以
 
 $$
-\boldsymbol{h} =
-(\boldsymbol{A}^T \boldsymbol{A})^{-1} \boldsymbol{A}^T \boldsymbol{b}
+\mathbf{h} =
+(\mathbf{A}^T \mathbf{A})^{-1} \mathbf{A}^T \mathbf{b}
 $$
 
 ### cont 2: H的F范数|H|=1
@@ -392,33 +392,33 @@ $$
 线性方程：
 
 $$
-\boldsymbol{A} \cdot \boldsymbol{h} = \mathbf{0}
+\mathbf{A} \cdot \mathbf{h} = \mathbf{0}
 $$
 
 求解：
 
 $$
-\boldsymbol{A}^T \boldsymbol{A} \cdot \boldsymbol{h} = \mathbf{0}
+\mathbf{A}^T \mathbf{A} \cdot \mathbf{h} = \mathbf{0}
 $$
 
 对上式 求解 **最小二乘解**（尺度等价性）
 
 $$
-\min_{\boldsymbol{h}} \|(\boldsymbol{A}^T \boldsymbol{A}) \cdot \boldsymbol{h}\|^2
+\min_{\mathbf{h}} \|(\mathbf{A}^T \mathbf{A}) \cdot \mathbf{h}\|^2
 \quad s.t. \quad
-\|\boldsymbol{h}^T \boldsymbol{h}\| = 1
+\|\mathbf{h}\| = 1
 \quad \text{or} \quad
-{\|\boldsymbol{H}\|}_F = 1
+{\|\mathbf{H}\|}_F = 1
 $$
 
 SVD分解 或 特征值分解
 
 $$
-\text{SVD}(\boldsymbol{A}^T \boldsymbol{A}) =
-\boldsymbol{U} \boldsymbol{\Sigma} \boldsymbol{U}^T
+\text{SVD}(\mathbf{A}^T \mathbf{A}) =
+\mathbf{U} \boldsymbol{\Sigma} \mathbf{U}^T
 $$
 
-最后 $\boldsymbol{h}$ 为 $\boldsymbol{\Sigma}$ 中 **最小特征值** 对应的 $\boldsymbol{U}$ 中的列向量（单位特征向量）；如果只用4对匹配点，那个特征值为0。
+最后 $\mathbf{h}$ 为 $\boldsymbol{\Sigma}$ 中 **最小特征值** 对应的 $\mathbf{U}$ 中的列向量（单位特征向量）；如果只用4对匹配点，那个特征值为0。
 
 
 
