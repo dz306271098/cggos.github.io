@@ -22,11 +22,11 @@ tags: [Stereo Vision, 3D Reconstruction]
 </div>
 
 
-# 图像采集
+# 1. 图像采集
 
 双目相机采集 **左右目图像**
 
-# 双目标定
+# 2. 双目标定
 
 通过 **双目标定工具** 对双目相机进行标定，得到如下结果参数：  
 
@@ -58,7 +58,7 @@ cv::fisheye::stereoCalibrate(
         flag, cv::TermCriteria(3, 12, 0));
 ```
 
-# 双目矫正
+# 3. 双目矫正
 
 双目矫正 主要包括两方面：**畸变矫正** 和 **立体矫正** 。  
 
@@ -68,7 +68,9 @@ cv::fisheye::stereoCalibrate(
 * initUndistortRectifyMap
 * remap
 
-（1）根据双目标定的结果 $K_1, K_2, D_1, D_2, R, t$，利用 OpenCV函数 **stereoRectify**，计算得到如下参数
+## stereoRectify
+
+根据双目标定的结果 $K_1, K_2, D_1, D_2, R, t$，利用 OpenCV函数 **stereoRectify**，计算得到如下参数
 
 * 左目 矫正矩阵(旋转矩阵) $R_1$ (3x3)
 * 右目 矫正矩阵(旋转矩阵) $R_2$ (3x3)
@@ -120,7 +122,7 @@ $$
 
 $$
 \begin{aligned}
-    baseline = B = - t_x' = - \frac{ {P_2}_{(03)} }{f'}
+    \text{baseline} = B = - t_x' = - \frac{ {P_2}^{(03)} }{f'}
 \end{aligned}
 $$
 
@@ -133,7 +135,66 @@ cv::fisheye::stereoRectify(
         CV_CALIB_ZERO_DISPARITY, img_size_, 0.0, 1.1);
 ```
 
-（2）左右目 分别利用 OpenCV函数 **initUndistortRectifyMap** 计算 **the undistortion and rectification transformation map**，得到
+### CameraInfo DKRP
+
+参考：[sensor_msgs/CameraInfo Message](http://docs.ros.org/melodic/api/sensor_msgs/html/msg/CameraInfo.html)
+
+* **D**: distortion parameters.
+  - For "plumb_bob", the 5 parameters are: (k1, k2, t1, t2, k3)
+* **K**: Intrinsic camera matrix for the raw (distorted) images.
+  * Projects 3D points in the camera coordinate frame to 2D pixel coordinates using the focal lengths (fx, fy) and principal point (cx, cy).
+  $$
+  \mathbf{K} =
+    \begin{bmatrix}
+    f_x & 0 & c_x \\
+    0 & f_y & c_y \\
+    0 & 0 & 1
+    \end{bmatrix}
+  $$
+* **R**: Rectification matrix (stereo cameras only).
+  - A rotation matrix aligning the camera coordinate system to the ideal stereo image plane so that epipolar lines in both stereo images are parallel.
+  - For monocular cameras $\mathbf{R} = \mathbf{I}$
+* **P**: Projection/camera matrix.
+  - For **monocular** cameras
+    $$
+    \mathbf{P} =
+      \begin{bmatrix}
+      f_x & 0 & c_x & 0 \\
+      0 & f_y & c_y & 0 \\
+      0 & 0 & 1 & 0
+      \end{bmatrix}
+    $$
+  - For a **stereo** pair, the fourth column [Tx Ty 0]' is related to the position of the optical center of the second camera in the first camera's frame. We assume Tz = 0 so both cameras are in the same stereo image plane.
+    - The first camera
+      $$
+      \mathbf{P} =
+        \begin{bmatrix}
+        f_x' & 0 & c_x' & 0 \\
+        0 & f_y' & c_y' & 0 \\
+        0 & 0 & 1 & 0
+        \end{bmatrix}
+      $$
+    - The second camera
+      $$
+      \mathbf{P} =
+        \begin{bmatrix}
+        f_x' & 0 & c_x' & -f_x' \cdot B \\
+        0 & f_y' & c_y' & 0 \\
+        0 & 0 & 1 & 0
+        \end{bmatrix}
+      $$
+  - Given a 3D point $[X Y Z]'$, the projection $(x, y)$ of the point onto the rectified image is given by:
+
+  $$
+  \begin{bmatrix} u \\ v \\ w \end{bmatrix} =
+  \mathbf{P} \cdot \begin{bmatrix} X \\ Y \\ Z \\ 1 \end{bmatrix}
+  , \quad
+  \begin{cases} x = \frac{u}{w} \\ y = \frac{v}{w} \end{cases}
+  $$
+
+## initUndistortRectifyMap
+
+左右目 分别利用 OpenCV函数 **initUndistortRectifyMap** 计算 **the undistortion and rectification transformation map**，得到
 
 * 左目map: $map^l_1, map^l_2$
 * 右目map: $map^r_1, map^r_2$
@@ -144,7 +205,9 @@ cv::fisheye::initUndistortRectifyMap(K1, D1, R1, P1, img_size, CV_16SC2, rect_ma
 cv::fisheye::initUndistortRectifyMap(K2, D2, R2, P2, img_size, CV_16SC2, rect_map_[1][0], rect_map_[1][1]);
 ```
 
-（3）左右目 分别利用 OpenCV函数 **remap** 并根据 **左右目map** 对左右目图像进行 **去畸变 和 立体矫正**，得到 **左右目矫正图像**
+## Remap
+
+左右目 分别利用 OpenCV函数 **remap** 并根据 **左右目map** 对左右目图像进行 **去畸变 和 立体矫正**，得到 **左右目矫正图像**
 
 示例代码：  
 ```c++
@@ -152,7 +215,7 @@ cv::remap(img_l, img_rect_l, rect_map_[0][0], rect_map_[0][1], cv::INTER_LINEAR)
 cv::remap(img_r, img_rect_r, rect_map_[1][0], rect_map_[1][1], cv::INTER_LINEAR);
 ```
 
-# 立体匹配
+# 4. 立体匹配
 
 根据双目矫正图像，通过 **BM或SGM等立体匹配算法** 对其进行立体匹配，计算 **视差图**
 
@@ -171,7 +234,7 @@ So if you've chosen **disptype = CV_16S** during computation, you can access a p
 * [Disparity Map](http://www.jayrambhia.com/blog/disparity-mpas)
 * [Disparity map post-filtering](https://docs.opencv.org/3.1.0/d3/d14/tutorial_ximgproc_disparity_filtering.html)
 
-# 三维重建
+# 5. 三维重建
 
 （1）算法1：根据视差图，利用 $f'$ 和 $B$ 通过几何关系计算 **深度值**，并利用相机内参计算 **三维坐标**
 
@@ -183,8 +246,8 @@ So if you've chosen **disptype = CV_16S** during computation, you can access a p
 
 $$
 \begin{aligned}
-	Z = depth = \frac{f' \cdot B}{d_p} \\
-  d_p = disp(u,v) + ({c_x}_2' - {c_x}_1')
+	Z = \text{depth} = \frac{f' \cdot B}{d_p} \\
+  d_p = \text{disp}(u,v) + ({c_x}_2' - {c_x}_1')
 \end{aligned}
 $$
 
@@ -193,31 +256,31 @@ $$
 $$
 \begin{aligned}
 	\begin{cases}
-	Z = depth = \frac{f' \cdot B}{d_p} \\
+	Z = \text{depth} = \frac{f' \cdot B}{d_p} \\
 	X = \frac{u-{c_x}_1'}{f'} \cdot Z \\
 	Y = \frac{v-{c_y}'}{f'} \cdot Z
 	\end{cases}
 \end{aligned}
-\text{或}
+\quad \text{or} \quad
 \begin{aligned}
 	\begin{cases}
-  bd = \frac{B}{d_p}\\
-	Z = depth = f' \cdot bd \\
-	X = (u-{c_x}_1') \cdot bd \\
-	Y = (u-{c_y}') \cdot bd
+  \text{bd} = \frac{B}{d_p}\\
+	Z = \text{depth} = f' \cdot \text{bd} \\
+	X = (u-{c_x}_1') \cdot \text{bd} \\
+	Y = (v-{c_y}') \cdot \text{bd}
 	\end{cases}
 \end{aligned}
 $$
 
 
-其中，$disp(u,v)$ 代表 视差图 坐标值  
+其中，$\text{disp}(u,v)$ 代表 视差图 坐标值  
 
 （2）算法2：根据视差图，利用 **$Q$ 矩阵** 计算 三维点坐标（**reprojectImageTo3D**）
 
 $$
 \begin{bmatrix} X' \\ Y' \\ Z' \\ W \end{bmatrix} =
 Q \cdot
-\begin{bmatrix} u \\ v \\ disp(u,v) \\ 1 \end{bmatrix}
+\begin{bmatrix} u \\ v \\ \text{disp}(u,v) \\ 1 \end{bmatrix}
 $$
 
 最终，三维点坐标为
