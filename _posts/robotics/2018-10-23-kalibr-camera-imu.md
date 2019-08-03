@@ -231,11 +231,9 @@ kalibr_calibrate_imu_camera \
     --cam camchain.yaml \
     --imu imu.yaml \
     --imu-models scale-misalignment \
-    --time-calibration \
     --timeoffset-padding 0.1
 ```
 
-* **--time-calibration**: the **temporal calibration** is turned off by default and can be enabled using the argument
 * **--bag-from-to 5 45**: because there are shocks in the dataset (sensor pick-up/lay-down), only the data between 5 to 45 s is used
 
 ## 输出 camchain-imucam.yaml
