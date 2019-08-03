@@ -141,9 +141,11 @@ $$
 \mathbf{R} = \mathbf{R}_1 \mathbf{R}_2 \mathbf{R}_3
 $$
 
-根据绕轴的不同，欧拉角共分为两大类，共12种，如下图（基于 **右手系**）所示：  
-![euler_angles_12.png](../images/3d_transform/euler_angles_12.png)
+根据绕轴的不同，欧拉角共分为两大类，共12种，如下图（基于 **右手系**）所示：    
+![euler_angles_12.png](../images/3d_transform/euler_angles_12.jpg)
+
 <a name="is_fixed_axis"></a>
+
 以上不同旋转轴合成的旋转矩阵，每一种都可以看成 **同一旋转矩阵的两种不同物理变换**：
 * 绕 **固定轴** 旋转
 * 绕 **动轴** 旋转
@@ -347,6 +349,8 @@ $$
 $$
 
 因为上面的变换都是 **坐标系的变换**，所以矩阵相乘 从左到右，即 **矩阵右乘**
+
+![pointcloud_imu.jpg](../images/3d_transform/pointcloud_imu.jpg)
 
 
 
