@@ -12,6 +12,8 @@ tags: [SLAM]
 
 * [HKUST-Aerial-Robotics/VINS-kidnap](https://github.com/HKUST-Aerial-Robotics/VINS-kidnap): VINS-Fusion with Cerebro
 
+* [vins kidnap安装使用](https://blog.csdn.net/huanghaihui_123/article/details/90181975)
+
 # Install Nvidia Drive and CUDA
 
 * [ubuntu上安装NVIDIA驱动和cuda9.0，及NVIDIA-Docker](https://blog.csdn.net/huanghaihui_123/article/details/87985403)
